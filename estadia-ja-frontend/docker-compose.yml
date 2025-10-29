@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  # O nome do nosso serviço de frontend
+  frontend:
+    build: .
+    container_name: frontend_app # Nome do container
+    ports:
+      # A porta 5173 do Vite
+      - "5173:5173" 
+    volumes:
+      # Sincroniza o código-fonte para o hot-reload
+      - .:/app
+      # Isola o node_modules de dentro do container
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    networks:
+      # Conecta este container na mesma rede do backend
+      - estadia_ja_network
+
+networks:
+  # Informa ao Docker que esta rede já existe
+  # e foi criada por outro compose (o do backend)
+  estadia_ja_network:
+    external: true
