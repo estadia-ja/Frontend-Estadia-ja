@@ -1,9 +1,9 @@
-
+import { SignUp } from "./pages/SignUp"
 
 export function App(){
   return (
     <>
-      Ola mundo
+      <SignUp/>
     </>
   )
 }
