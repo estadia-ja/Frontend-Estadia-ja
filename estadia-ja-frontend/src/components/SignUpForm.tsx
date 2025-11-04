@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Home, ArrowLeft } from "lucide-react";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 export function SignUpForm() {
     const [name, setName] = useState("");
@@ -127,13 +128,13 @@ export function SignUpForm() {
 
             <div className="w-full md:w-2/3 flex items-center justify-center p-6 md:p-12 overflow-y-auto">
                 <div className="w-full max-w-lg">
-                    <a
-                        href="#"
-                        className="flex items-center text-sm text-[#1D3557] hover:underline mb-8"
+                    <Link 
+                        to="/" 
+                        className="hover:underline flex items-center text-sm text-[#1D3557] hover:underline mb-8"
                     >
                         <ArrowLeft className="w-5 h-5" />
                         <span className="ml-1">Voltar para o site</span>
-                    </a>
+                    </Link>
 
                     <h1 className="text-4xl font-bold text-[#1D3557] mb-8">
                         Bem-vindo!
