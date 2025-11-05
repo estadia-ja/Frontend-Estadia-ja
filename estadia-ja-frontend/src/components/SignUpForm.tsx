@@ -19,6 +19,8 @@ export function SignUpForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [apiMessage, setApiMessage] = useState({ type: "", text: "" });
 
+    const navigate = useNavigate();
+
     const validateForm = () => {
         setNameError("");
         setEmailError("");
@@ -75,17 +77,29 @@ export function SignUpForm() {
         };
         const apiUrl = import.meta.env.VITE_API_BASE_URL + "/user";
         try {
-            const response = await axios.post(apiUrl, payload);
-            console.log("Usuário criado:", response.data);
-            setApiMessage({
-                type: "success",
-                text: "Usuário criado com sucesso!",
-            });
-            setName("");
-            setEmail("");
-            setPassword("");
-            setCpf("");
-            setPhones("");
+            await axios.post(apiUrl, payload);
+
+            const loginPayload = { email, password }
+            const loginApiUrl = import.meta.env.VITE_AUTH_API_BASE_URL + "/auth";
+
+            try {
+                const loginResponse = await axios.post(loginApiUrl, loginPayload);
+
+                localStorage.setItem("authToken", loginResponse.data.token);
+                setApiMessage({
+                    type: "success",
+                    text: "Usuário criado e logado! Redirecionando...",
+                });
+
+                navigate("/");
+            } catch (error) {
+                console.error("Cadastro OK, mas login automático falhou:", error);
+                setApiMessage({
+                    type: "success",
+                    text: "Cadastro criado! Por favor, faça o login.",
+                });
+                setTimeout(() => navigate("/login"), 1500);
+            }
         } catch (error) {
             console.error("Erro ao criar usuário:", error);
             let errorMessage = "Erro ao criar usuário. Tente novamente.";
@@ -121,7 +135,7 @@ export function SignUpForm() {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden font-sans bg-[#F5F5DC]">
+        <div className="flex h-screen overflow-hidden font-sans bg-[#F1FAEE]">
             <div className="hidden md:flex md:w-1/3 bg-[#457B9D] items-center justify-center p-12">
                 <Home className="w-32 h-32 text-[#1D3557]" />
             </div>

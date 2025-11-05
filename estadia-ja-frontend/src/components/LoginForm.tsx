@@ -100,7 +100,7 @@ export function LoginForm () {
     };
 
     return(
-        <div className="flex h-screen overflow-hidden font-sans bg-[#F5F5DC]">
+        <div className="flex h-screen overflow-hidden font-sans bg-[#F1FAEE]">
             <div className="hidden md:flex md:w-1/3 bg-[#457B9D] items-center justify-center p-12">
                 <Home className="w-32 h-32 text-[#1D3557]" />
             </div>
