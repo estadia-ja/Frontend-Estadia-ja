@@ -47,6 +47,7 @@ export function SearchBar(props: SearchBarProps) {
                     onClick={props.onOpenCalendarModal}
                     className="h-16 md:h-full md:flex-1 w-full flex flex-col justify-center text-left pl-6 bg-[#457B9D] text-white hover:bg-opacity-90 transition-colors"
                 >
+                    <span className="text-xs font-bold uppercase">Check-out</span>
                     <span className="text-sm">
                         {props.checkOut || "Insira data de saída"}
                     </span>

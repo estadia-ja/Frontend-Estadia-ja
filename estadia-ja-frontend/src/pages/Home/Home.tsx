@@ -8,6 +8,7 @@ import { CalendarModal } from "../../components/modals/CalendarModal";
 import { GuestsModal } from "../../components/modals/GuestModal";
 import { ListingGrid } from "../../components/ListingGrid";
 import { type Listing } from "../../components/ListingCard";
+import { FilterBar } from "../../components/FilterBar";
 
 const MOCK_DATA: Listing[] = [
     { id: "1", title: "Apartamento Aconchegante em São Paulo", imageUrl: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=1974", pricePerNight: 250, rating: 4.8 },
@@ -20,6 +21,13 @@ const MOCK_DATA: Listing[] = [
     { id: "8", title: "Cabana na Floresta (Amazônia)", imageUrl: "https://images.unsplash.com/photo-1542361252-81b21952d7d8?q=80&w=2070", pricePerNight: 420, rating: 4.9 },
 ];
 
+const locationOptions = [
+    ...new Set(MOCK_DATA.map(item => {
+      const parts = item.title.split(" em ");
+      return parts.length > 1 ? parts[1] : item.title.split(" (")[0];
+    }))
+];
+
 export function Home () {
     const [destination, setDestination] = useState("");
     const [checkIn, setCheckIn] = useState("");
@@ -30,21 +38,48 @@ export function Home () {
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
     const [isGuestsModalOpen, setIsGuestsModalOpen] = useState(false);
 
+    const [allListings, setAllListings] = useState<Listing[]>([]); 
     const [listings, setListings] = useState<Listing[]>([]);
+    const [filterLocation, setFilterLocation] = useState("all");
+    const [filterRating, setFilterRating] = useState("all");
 
     useEffect(() => {
         setListings(MOCK_DATA);
+        setAllListings(MOCK_DATA);
     }, []);
 
+    useEffect(() => {
+        let filtered = [...allListings];
+    
+        if (destination) {
+          filtered = filtered.filter(l =>
+            l.title.toLowerCase().includes(destination.toLowerCase())
+          );
+        }
+        
+        if (filterLocation !== "all") {
+          filtered = filtered.filter(l => 
+            l.title.includes(filterLocation)
+          );
+        }
+    
+        if (filterRating !== "all") {
+          const minRating = parseFloat(filterRating);
+          filtered = filtered.filter(l => l.rating >= minRating);
+        }
+        
+        setListings(filtered);
+    
+      }, [
+        destination,
+        filterLocation, 
+        filterRating, 
+        allListings 
+    ]);
+    
     const handleSearchSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        console.log("Buscando dados na HomePage com:", {
-          destination, checkIn, checkOut, guests,
-        });
-        const filtered = MOCK_DATA.filter(l => 
-          l.title.toLowerCase().includes(destination.toLowerCase())
-        );
-        setListings(filtered);
+        console.log("Busca disparada!");
     };
 
     const openDestinationModal = () => setIsDestinationModalOpen(true);
@@ -69,6 +104,14 @@ export function Home () {
                 <h2 className="text-3xl font-bold text-[#1D3557] mb-6">
                     {destination ? `Resultados para "${destination}"` : "Lugares mais visitados"}
                 </h2>
+
+                <FilterBar
+                    filterLocation={filterLocation}
+                    setFilterLocation={setFilterLocation}
+                    filterRating={filterRating}
+                    setFilterRating={setFilterRating}
+                    locationOptions={locationOptions}
+                />
 
                 {listings.length > 0 ? (
                 <ListingGrid listings={listings} />
