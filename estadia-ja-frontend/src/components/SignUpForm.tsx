@@ -51,8 +51,7 @@ export function SignUpForm() {
             isValid = false;
         }
 
-        const passRegex =
-        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+        const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[]{};':"\\|,.<>\/?]).{8,}$/;
         if (!passRegex.test(password)) {
             setPasswordError(
                 "Senha: 8+ dígitos, 1 maiúscula, 1 número, 1 especial."

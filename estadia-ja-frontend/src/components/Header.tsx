@@ -3,24 +3,21 @@ import { Link, useNavigate } from "react-router-dom";
 import { Home, Heart, UserRound, Menu, X } from "lucide-react";
 
 export function Header() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        const token = localStorage.getItem("authToken");
+        return !!token;
+    });
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem("authToken");
-        setIsLoggedIn(!!token);
-
         const handleStorageChange = () => {
             const token = localStorage.getItem("authToken");
             setIsLoggedIn(!!token);
         };
-
-        window.addEventListener("storage", handleStorageChange);
-
-        return () => {
-            window.removeEventListener("storage", handleStorageChange);
-        };
+        
+            window.addEventListener("storage", handleStorageChange);
+            return () => window.removeEventListener("storage", handleStorageChange);
     }, []); 
 
     const handleLogout = () => {

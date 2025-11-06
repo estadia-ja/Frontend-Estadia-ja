@@ -1,5 +1,5 @@
 import React from "react";
-import { SlidersHorizontal, MapPin, Star } from "lucide-react";
+import { MapPin, Star } from "lucide-react";
 
 type FilterBarProps = {
     filterLocation: string;

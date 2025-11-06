@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { Banner } from "../../components/Banner";
@@ -38,44 +38,34 @@ export function Home () {
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
     const [isGuestsModalOpen, setIsGuestsModalOpen] = useState(false);
 
-    const [allListings, setAllListings] = useState<Listing[]>([]); 
-    const [listings, setListings] = useState<Listing[]>([]);
+    const [allListings] = useState(MOCK_DATA);
     const [filterLocation, setFilterLocation] = useState("all");
     const [filterRating, setFilterRating] = useState("all");
 
-    useEffect(() => {
-        setListings(MOCK_DATA);
-        setAllListings(MOCK_DATA);
-    }, []);
-
-    useEffect(() => {
+    const listings = useMemo(() => {
+        // A lógica de filtragem vai aqui dentro
         let filtered = [...allListings];
     
         if (destination) {
-          filtered = filtered.filter(l =>
-            l.title.toLowerCase().includes(destination.toLowerCase())
-          );
+            filtered = filtered.filter(l =>
+                l.title.toLowerCase().includes(destination.toLowerCase())
+            );
         }
         
         if (filterLocation !== "all") {
-          filtered = filtered.filter(l => 
-            l.title.includes(filterLocation)
-          );
+            filtered = filtered.filter(l => 
+                l.title.includes(filterLocation)
+            );
         }
     
         if (filterRating !== "all") {
-          const minRating = parseFloat(filterRating);
-          filtered = filtered.filter(l => l.rating >= minRating);
+            const minRating = parseFloat(filterRating);
+            filtered = filtered.filter(l => l.rating >= minRating);
         }
         
-        setListings(filtered);
+        return filtered; 
     
-      }, [
-        destination,
-        filterLocation, 
-        filterRating, 
-        allListings 
-    ]);
+    }, [allListings, destination, filterLocation, filterRating]);
     
     const handleSearchSubmit = (event: React.FormEvent) => {
         event.preventDefault();
