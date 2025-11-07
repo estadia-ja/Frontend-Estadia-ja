@@ -1,3 +1,4 @@
+// src/components/modals/DestinationModal.tsx (Atualizado)
 import React, { useState } from 'react';
 import { X, MapPin, Search } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export function DestinationModal(props: DestinationModalProps) {
             type='text'
             value={local}
             onChange={(e) => setLocal(e.target.value)}
-            placeholder='Buscar por localidade'
+            placeholder='Buscar por estado (ex: SP, RJ, BA)'
             className='w-full rounded-full border-2 border-gray-300 py-3 pl-12 pr-6 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all focus:ring-2 focus:ring-[#1D3557]'
             autoFocus
           />

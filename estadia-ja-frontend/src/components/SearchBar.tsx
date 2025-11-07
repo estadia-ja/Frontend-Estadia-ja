@@ -1,3 +1,4 @@
+// src/components/SearchBar/index.tsx (Atualizado)
 import React from 'react';
 import { Search } from 'lucide-react';
 
@@ -18,22 +19,22 @@ export function SearchBar(props: SearchBarProps) {
       onSubmit={props.onSearchSubmit}
       className='container mx-auto w-full max-w-4xl p-4'
     >
-      <div className='flex w-full flex-col overflow-hidden rounded-xl shadow-lg md:h-[72px] md:flex-row md:rounded-full'>
+      <div className='flex h-[72px] w-full items-center overflow-hidden rounded-full shadow-lg'>
         <button
           type='button'
           onClick={props.onOpenDestinationModal}
-          className='flex h-16 w-full flex-col justify-center bg-[#457B9D] pl-6 text-left text-white transition-colors hover:bg-opacity-90 md:h-full md:flex-1'
+          className='flex h-full flex-1 flex-col justify-center bg-[#457B9D] pl-6 text-left text-white transition-colors hover:bg-opacity-90'
         >
           <span className='text-xs font-bold uppercase'>Onde</span>
           <span className='truncate text-sm'>
-            {props.destination || 'Buscar por localidade'}
+            {props.destination || 'Estado (ex: SP, RJ)'}
           </span>
         </button>
 
         <button
           type='button'
           onClick={props.onOpenCalendarModal}
-          className='flex h-16 w-full flex-col justify-center bg-[#1D3557] pl-6 text-left text-white transition-colors hover:bg-opacity-80 md:h-full md:flex-1'
+          className='flex h-full flex-1 flex-col justify-center bg-[#1D3557] pl-6 text-left text-white transition-colors hover:bg-opacity-80'
         >
           <span className='text-xs font-bold uppercase'>Check-in</span>
           <span className='text-sm'>
@@ -44,15 +45,15 @@ export function SearchBar(props: SearchBarProps) {
         <button
           type='button'
           onClick={props.onOpenCalendarModal}
-          className='flex h-16 w-full flex-col justify-center bg-[#457B9D] pl-6 text-left text-white transition-colors hover:bg-opacity-90 md:h-full md:flex-1'
+          className='flex h-full flex-1 flex-col justify-center bg-[#457B9D] pl-6 text-left text-white transition-colors hover:bg-opacity-90'
         >
-          <span className='text-xs font-bold uppercase'>Check-out</span>
+          <span className='text-xs font-bold uppercase'>Checkout</span>
           <span className='text-sm'>
             {props.checkOut || 'Insira data de saída'}
           </span>
         </button>
 
-        <div className='flex h-16 w-full items-center justify-between bg-[#1D3557] pl-6 text-white md:h-full md:flex-1'>
+        <div className='flex h-full flex-1 items-center justify-between bg-[#1D3557] pl-6 text-white'>
           <button
             type='button'
             onClick={props.onOpenGuestsModal}
