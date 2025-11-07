@@ -20,11 +20,8 @@ export function Header() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    setIsLoggedIn(false);
-    setIsMenuOpen(false);
-    navigate('/');
+  const handleProfilePage = () => {
+    navigate('/perfil');
   };
 
   const closeMenu = () => {
@@ -51,7 +48,7 @@ export function Header() {
                   <span>Favoritos</span>
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={handleProfilePage}
                   title='Sair'
                   className='rounded-full bg-[#457B9D] p-2 text-[#F1FAEE] transition-colors hover:bg-opacity-90'
                 >
@@ -103,7 +100,7 @@ export function Header() {
                   Favoritos
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={handleProfilePage}
                   className='w-full rounded-full bg-[#457B9D] px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
                 >
                   Sair
