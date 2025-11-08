@@ -1,63 +1,111 @@
-import { useState, useEffect } from 'react';
-import { type Property } from '../../components/ListingCard';
-import { ProfileHeader } from '../../components/ProfileHeader';
-import { ReservationsBlock } from '../../components/ReservationsBlock';
-import { BecomeOwnerBlock } from '../../components/BecomeOwnerBlock';
-import { AnalyticsBlock } from '../../components/AnalyticsBlock';
-import { MyPropertiesBlock } from '../../components/MyPropertiesBlock';
-import { Header } from '../../components/Header';
-import { Footer } from 'react-day-picker';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { type Property } from "../../components/ListingCard";
+import { ProfileHeader } from "../../components/ProfileHeader";
+import { ReservationsBlock } from "../../components/ReservationsBlock";
+import { BecomeOwnerBlock } from "../../components/BecomeOwnerBlock";
+import { AnalyticsBlock } from "../../components/AnalyticsBlock";
+import { MyPropertiesBlock } from "../../components/MyPropertiesBlock";
+import { OwnerReservationsBlock } from "../../components/OwnerReservationsBlock";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+export type Phone = {
+  id: string;
+  phone: string;
+};
 
 export type User = {
   name: string;
   email: string;
   cpf: string;
-  phone: string;
+  phones: Phone[];
   avatarUrl: string;
+  avgRating: string;
 };
 
 export type Reservation = {
   id: string;
 };
 
-const MOCK_USER: User = {
-  name: 'Nome do Usuário',
-  email: 'email@email.com',
-  cpf: '000.000.000-00',
-  phone: '(61) 9 9876 5432',
-  avatarUrl: 'https://placehold.co/128x128/A8DADC/1D3557?text=User',
-};
-
-const MOCK_RESERVATIONS: Reservation[] = [];
-
-const MOCK_MY_PROPERTIES: Property[] = [
-  {
-    id: '3',
-    type: 'Chalé',
-    city: 'Campos do Jordão',
-    dailyRate: 380,
-    avgRating: 4.7,
-    images: [{ id: '3' }],
-    description: '',
-    state: '',
-  },
-];
-
 export function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [myProperties, setMyProperties] = useState<Property[]>([]);
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
+  const [ownerReservations, setOwnerReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const handleFetchError = (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return { data: [] }; 
+    }
+    throw error;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      setApiError(null);
+      
+      const token = localStorage.getItem("authToken");
+      const userId = localStorage.getItem("userId");
+
+      if (!token || !userId) {
+        setIsLoading(false);
+        setApiError("Usuário não autenticado.");
+        return;
+      }
+
+      const authHeaders = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+
       try {
-        setUser(MOCK_USER);
-        setMyProperties(MOCK_MY_PROPERTIES);
-        setMyReservations(MOCK_RESERVATIONS);
+        const userPromise = axios.get(`${API_URL}/user/${userId}`);
+        
+        const propertiesPromise = axios.get(
+          `${API_URL}/property/my-properties`, 
+          authHeaders
+        ).catch(handleFetchError); 
+        
+        const reservationsPromise = axios.get(
+          `${API_URL}/reserve/my-reservations`, 
+          authHeaders
+        ).catch(handleFetchError); 
+        
+        const ownerReservationsPromise = axios.get(
+          `${API_URL}/reserve/owner`, 
+          authHeaders
+        ).catch(handleFetchError);
+        
+        const [
+          userResponse, 
+          propertiesResponse, 
+          reservationsResponse,
+          ownerReservationsResponse
+        ] = await Promise.all([
+          userPromise, 
+          propertiesPromise, 
+          reservationsPromise,
+          ownerReservationsPromise
+        ]);
+
+        const avatarUrl = `${API_URL}/user/${userId}/image`;
+        
+        setUser({ ...userResponse.data, avatarUrl });
+        setMyProperties(propertiesResponse.data || []);
+        setMyReservations(reservationsResponse.data || []);
+        setOwnerReservations(ownerReservationsResponse.data || []);
+
       } catch (error) {
-        console.error('Erro ao buscar dados do perfil:', error);
+        console.error("Erro ao buscar dados do perfil:", error);
+        setApiError("Falha ao carregar dados do perfil. Tente novamente.");
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          setMyProperties([]);
+          setMyReservations([]);
+          setOwnerReservations([]);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -66,21 +114,23 @@ export function ProfilePage() {
   }, []);
 
   const handleBecomeOwner = () => {
-    console.log('Redirecionando...');
+    console.log("Redirecionando...");
   };
 
   if (isLoading) {
     return (
-      <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
-        <p className='text-lg'>Carregando perfil...</p>
+      <div className="flex-grow flex items-center justify-center bg-[#A8DADC]">
+        <p className="text-lg">Carregando perfil...</p>
       </div>
     );
   }
 
-  if (!user) {
+  if (apiError || !user) {
     return (
-      <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
-        <p className='text-lg text-red-500'>Erro ao carregar dados.</p>
+      <div className="flex-grow flex items-center justify-center bg-[#A8DADC]">
+        <p className="text-lg text-red-700">
+          {apiError || "Erro ao carregar dados do usuário."}
+        </p>
       </div>
     );
   }
@@ -88,25 +138,26 @@ export function ProfilePage() {
   const isOwner = myProperties.length > 0;
 
   return (
-    <>
-      <Header />
-      <div className='flex-grow bg-[#ffffff] p-4 md:p-8'>
-        <div className='container mx-auto max-w-7xl space-y-10'>
-          <ProfileHeader user={user} />
+    <div className="flex-grow bg-[#fff] p-4 md:p-8">
+      <div className="container mx-auto max-w-7xl space-y-10">
+        
+        <ProfileHeader user={user} />
 
-          <ReservationsBlock reservations={myReservations} />
+        <ReservationsBlock reservations={myReservations} />
 
+        {!isOwner && (
           <BecomeOwnerBlock onClick={handleBecomeOwner} />
-
-          {isOwner && (
-            <>
-              <AnalyticsBlock />
-              <MyPropertiesBlock myProperties={myProperties} />
-            </>
-          )}
-        </div>
+        )}
+        
+        {isOwner && (
+          <>
+            <AnalyticsBlock />
+            <OwnerReservationsBlock reservations={ownerReservations} />
+            <MyPropertiesBlock myProperties={myProperties} />
+          </>
+        )}
+        
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }

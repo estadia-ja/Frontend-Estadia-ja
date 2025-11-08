@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Home, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext'; 
 
 const GoogleIcon = () => (
   <svg
@@ -37,7 +38,8 @@ export function LoginForm() {
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiMessage, setApiMessage] = useState({ type: '', text: '' });
-  const navigate = useNavigate();
+  
+  const { login } = useAuth(); // 2. PEGUE A FUNÇÃO 'login' DO CONTEXTO
 
   const validatedForm = () => {
     setEmailError('');
@@ -69,16 +71,21 @@ export function LoginForm() {
 
     try {
       const response = await axios.post(apiUrl, payload);
-      console.log('Login bem-sucedido:', response.data);
+      
+      const token = response.data.token;
+      const userId = response.data.userId; 
 
-      localStorage.setItem('authToken', response.data.token);
+      if (!token || !userId) {
+        throw new Error("Resposta de login inválida do servidor.");
+      }
 
       setApiMessage({
         type: 'success',
         text: 'Login Bem-sucedido! Redirecionando...',
       });
 
-      navigate('/');
+      login(token, userId, "/");
+
     } catch (error) {
       console.error('Erro nologin:', error);
 
