@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { type Property } from "../../components/ListingCard";
-import { ProfileHeader } from "../../components/ProfileHeader";
-import { ReservationsBlock } from "../../components/ReservationsBlock";
-import { BecomeOwnerBlock } from "../../components/BecomeOwnerBlock";
-import { AnalyticsBlock } from "../../components/AnalyticsBlock";
-import { MyPropertiesBlock } from "../../components/MyPropertiesBlock";
-import { OwnerReservationsBlock } from "../../components/OwnerReservationsBlock";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { type Property } from '../../components/ListingCard';
+import { ProfileHeader } from '../../components/ProfileHeader';
+import { ReservationsBlock } from '../../components/ReservationsBlock';
+import { BecomeOwnerBlock } from '../../components/BecomeOwnerBlock';
+import { AnalyticsBlock } from '../../components/AnalyticsBlock';
+import { MyPropertiesBlock } from '../../components/MyPropertiesBlock';
+import { OwnerReservationsBlock } from '../../components/OwnerReservationsBlock';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -38,7 +38,7 @@ export function ProfilePage() {
 
   const handleFetchError = (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 404) {
-      return { data: [] }; 
+      return { data: [] };
     }
     throw error;
   };
@@ -47,60 +47,56 @@ export function ProfilePage() {
     const fetchData = async () => {
       setIsLoading(true);
       setApiError(null);
-      
-      const token = localStorage.getItem("authToken");
-      const userId = localStorage.getItem("userId");
+
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
 
       if (!token || !userId) {
         setIsLoading(false);
-        setApiError("Usuário não autenticado.");
+        setApiError('Usuário não autenticado.');
         return;
       }
 
       const authHeaders = {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       };
 
       try {
         const userPromise = axios.get(`${API_URL}/user/${userId}`);
-        
-        const propertiesPromise = axios.get(
-          `${API_URL}/property/my-properties`, 
-          authHeaders
-        ).catch(handleFetchError); 
-        
-        const reservationsPromise = axios.get(
-          `${API_URL}/reserve/my-reservations`, 
-          authHeaders
-        ).catch(handleFetchError); 
-        
-        const ownerReservationsPromise = axios.get(
-          `${API_URL}/reserve/owner`, 
-          authHeaders
-        ).catch(handleFetchError);
-        
+
+        const propertiesPromise = axios
+          .get(`${API_URL}/property/my-properties`, authHeaders)
+          .catch(handleFetchError);
+
+        const reservationsPromise = axios
+          .get(`${API_URL}/reserve/my-reservations`, authHeaders)
+          .catch(handleFetchError);
+
+        const ownerReservationsPromise = axios
+          .get(`${API_URL}/reserve/owner`, authHeaders)
+          .catch(handleFetchError);
+
         const [
-          userResponse, 
-          propertiesResponse, 
+          userResponse,
+          propertiesResponse,
           reservationsResponse,
-          ownerReservationsResponse
+          ownerReservationsResponse,
         ] = await Promise.all([
-          userPromise, 
-          propertiesPromise, 
+          userPromise,
+          propertiesPromise,
           reservationsPromise,
-          ownerReservationsPromise
+          ownerReservationsPromise,
         ]);
 
         const avatarUrl = `${API_URL}/user/${userId}/image`;
-        
+
         setUser({ ...userResponse.data, avatarUrl });
         setMyProperties(propertiesResponse.data || []);
         setMyReservations(reservationsResponse.data || []);
         setOwnerReservations(ownerReservationsResponse.data || []);
-
       } catch (error) {
-        console.error("Erro ao buscar dados do perfil:", error);
-        setApiError("Falha ao carregar dados do perfil. Tente novamente.");
+        console.error('Erro ao buscar dados do perfil:', error);
+        setApiError('Falha ao carregar dados do perfil. Tente novamente.');
         if (axios.isAxiosError(error) && error.response?.status === 404) {
           setMyProperties([]);
           setMyReservations([]);
@@ -114,22 +110,22 @@ export function ProfilePage() {
   }, []);
 
   const handleBecomeOwner = () => {
-    console.log("Redirecionando...");
+    console.log('Redirecionando...');
   };
 
   if (isLoading) {
     return (
-      <div className="flex-grow flex items-center justify-center bg-[#A8DADC]">
-        <p className="text-lg">Carregando perfil...</p>
+      <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
+        <p className='text-lg'>Carregando perfil...</p>
       </div>
     );
   }
 
   if (apiError || !user) {
     return (
-      <div className="flex-grow flex items-center justify-center bg-[#A8DADC]">
-        <p className="text-lg text-red-700">
-          {apiError || "Erro ao carregar dados do usuário."}
+      <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
+        <p className='text-lg text-red-700'>
+          {apiError || 'Erro ao carregar dados do usuário.'}
         </p>
       </div>
     );
@@ -138,17 +134,14 @@ export function ProfilePage() {
   const isOwner = myProperties.length > 0;
 
   return (
-    <div className="flex-grow bg-[#fff] p-4 md:p-8">
-      <div className="container mx-auto max-w-7xl space-y-10">
-        
+    <div className='flex-grow bg-[#fff] p-4 md:p-8'>
+      <div className='container mx-auto max-w-7xl space-y-10'>
         <ProfileHeader user={user} />
 
         <ReservationsBlock reservations={myReservations} />
 
-        {!isOwner && (
-          <BecomeOwnerBlock onClick={handleBecomeOwner} />
-        )}
-        
+        {!isOwner && <BecomeOwnerBlock onClick={handleBecomeOwner} />}
+
         {isOwner && (
           <>
             <AnalyticsBlock />
@@ -156,7 +149,6 @@ export function ProfilePage() {
             <MyPropertiesBlock myProperties={myProperties} />
           </>
         )}
-        
       </div>
     </div>
   );

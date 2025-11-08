@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Home, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; 
+import { useAuth } from '../contexts/AuthContext';
 
 const GoogleIcon = () => (
   <svg
@@ -38,7 +38,7 @@ export function LoginForm() {
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiMessage, setApiMessage] = useState({ type: '', text: '' });
-  
+
   const { login } = useAuth(); // 2. PEGUE A FUNÇÃO 'login' DO CONTEXTO
 
   const validatedForm = () => {
@@ -71,12 +71,12 @@ export function LoginForm() {
 
     try {
       const response = await axios.post(apiUrl, payload);
-      
+
       const token = response.data.token;
-      const userId = response.data.userId; 
+      const userId = response.data.userId;
 
       if (!token || !userId) {
-        throw new Error("Resposta de login inválida do servidor.");
+        throw new Error('Resposta de login inválida do servidor.');
       }
 
       setApiMessage({
@@ -84,8 +84,7 @@ export function LoginForm() {
         text: 'Login Bem-sucedido! Redirecionando...',
       });
 
-      login(token, userId, "/");
-
+      login(token, userId, '/');
     } catch (error) {
       console.error('Erro nologin:', error);
 

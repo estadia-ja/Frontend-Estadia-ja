@@ -1,5 +1,6 @@
 import { ListingGrid } from './ListingGrid';
 import { type Property } from './ListingCard';
+import { Link } from 'react-router-dom';
 
 type MyPropertiesBlockProps = {
   myProperties: Property[];
@@ -12,9 +13,12 @@ export function MyPropertiesBlock({ myProperties }: MyPropertiesBlockProps) {
         <h3 className='text-2xl font-bold text-[#1D3557]'>
           Minhas Propriedades
         </h3>
-        <button className='rounded-full bg-[#1D3557] px-6 py-3 font-bold text-white transition-colors hover:bg-opacity-90'>
+        <Link
+          to='/property/new'
+          className='rounded-full bg-[#1D3557] px-6 py-3 font-bold text-white transition-colors hover:bg-opacity-90'
+        >
           Cadastrar nova propriedade
-        </button>
+        </Link>
       </div>
       <ListingGrid listings={myProperties} />
     </div>
