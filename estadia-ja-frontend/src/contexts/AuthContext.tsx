@@ -1,10 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
-import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type AuthContextType = {
   isLoggedIn: boolean;
-  isLoading: boolean; 
+  isLoading: boolean;
   login: (token: string, userId: string, redirectTo?: string) => void;
   logout: () => void;
 };
@@ -13,42 +13,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     try {
-      const token = localStorage.getItem("authToken");
-      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem('authToken');
+      const userId = localStorage.getItem('userId');
       if (token && userId) {
         setIsLoggedIn(true);
       }
     } catch (error) {
-      console.error("Falha ao checar token:", error);
+      console.error('Falha ao checar token:', error);
       setIsLoggedIn(false);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   }, []);
 
-  const login = (token: string, userId: string, redirectTo: string = "/") => {
-    localStorage.setItem("authToken", token);
-    localStorage.setItem("userId", userId);
+  const login = (token: string, userId: string, redirectTo: string = '/') => {
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('userId', userId);
     setIsLoggedIn(true);
     navigate(redirectTo);
   };
 
   const logout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userId");
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate('/login');
   };
 
   if (isLoading) {
-    return null; 
+    return null;
   }
-  
+
   return (
     <AuthContext.Provider value={{ isLoggedIn, isLoading, login, logout }}>
       {children}
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 }
