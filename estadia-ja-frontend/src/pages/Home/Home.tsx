@@ -113,7 +113,7 @@ export function Home() {
   const openGuestsModal = () => setIsGuestsModalOpen(true);
 
   return (
-    <>
+    <div>
       <Header />
       <Banner />
       <SearchBar
@@ -184,6 +184,6 @@ export function Home() {
           }}
         />
       )}
-    </>
+    </div>
   );
 }

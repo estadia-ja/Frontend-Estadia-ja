@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export function BecomeOwnerBlock() {
   return (
-    <div className='flex w-full flex-col items-center justify-between rounded-lg bg-[#fff] p-6 md:flex-row'>
+    <div className='flex w-full flex-col items-center justify-between rounded-lg bg-white p-6 md:flex-row'>
       <h3 className='mb-4 text-2xl font-bold text-[#1D3557] md:mb-0'>
         Quer alugar seu imóvel?
       </h3>

@@ -13,7 +13,7 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
           <img
             src={user.avatarUrl}
             alt='Avatar'
-            className='h-32 w-32 rounded-full border-4 border-white shadow-md'
+            className='h-32 w-32 rounded-full border-4 border-[#1D3557]'
           />
           <div className='flex-1 space-y-2 text-center md:text-left'>
             <h2 className='text-3xl font-bold text-[#1D3557]'>{user.name}</h2>

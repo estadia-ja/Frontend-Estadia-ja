@@ -8,7 +8,7 @@ export function OwnerReservationsBlock({
   reservations,
 }: OwnerReservationsBlockProps) {
   return (
-    <div className='w-full rounded-lg bg-[#fff] p-6'>
+    <div className='w-full rounded-lg bg-white p-6'>
       <h3 className='mb-4 text-center text-2xl font-bold text-[#1D3557]'>
         Reservas nos seus Imóveis
       </h3>
