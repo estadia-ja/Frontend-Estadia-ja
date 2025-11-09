@@ -7,6 +7,7 @@ import { Login } from './pages/Login/index.tsx';
 import { ProtectedRoute } from './components/ProtectedRoute.tsx';
 import { ProfilePage } from './pages/ProfilePage/index.tsx';
 import { NewProperty } from './pages/NewProperty/index.tsx';
+import { UpdatePropertyPage } from './pages/UpdateProperty/index.tsx';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path='/perfil' element={<ProfilePage />} />
         <Route path='/property/new' element={<NewProperty />} />
+        <Route path='/property/edit/:id' element={<UpdatePropertyPage />} />
       </Route>
     </Routes>
   );
