@@ -147,7 +147,11 @@ export function Home() {
         ) : apiError ? (
           <p className='text-center text-red-600'>{apiError}</p>
         ) : listings.length > 0 ? (
-          <ListingGrid listings={listings} />
+          <ListingGrid
+            listings={listings}
+            checkIn={checkIn}
+            checkOut={checkOut}
+          />
         ) : (
           <p className='text-center text-gray-600'>Nenhum imóvel encontrado.</p>
         )}

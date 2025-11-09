@@ -28,17 +28,28 @@ type ListingCardProps = {
   property: Property;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  checkIn?: string;
+  checkOut?: string;
 };
 
-export function ListingCard({ property, onEdit, onDelete }: ListingCardProps) {
+export function ListingCard({
+  property,
+  onEdit,
+  onDelete,
+  checkIn,
+  checkOut,
+}: ListingCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const title = `${property.type} em ${property.city}`;
   const formattedPrice = `R$ ${property.dailyRate.toFixed(2).replace('.', ',')}`;
   const firstImageId = property.images?.[0]?.id;
+
   const imageUrl = firstImageId
     ? `${API_URL}/property/image/${firstImageId}`
     : `https://placehold.co/600x400/457B9D/FFFFFF?text=${property.type}`;
+
+  const toUrl = `/property/${property.id}?checkIn=${checkIn || ''}&checkOut=${checkOut || ''}`;
 
   const handleFavoriteClick = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -57,10 +68,7 @@ export function ListingCard({ property, onEdit, onDelete }: ListingCardProps) {
 
   return (
     <div className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'>
-      <Link
-        to={`/property/${property.id}`}
-        className='block transition-opacity hover:opacity-90'
-      >
+      <Link to={toUrl} className='block transition-opacity hover:opacity-90'>
         <div className='relative'>
           <img
             src={imageUrl}
