@@ -80,6 +80,7 @@ export function PropertyDetailPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isBookingLoading, setIsBookingLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(0);
 
   const initialCheckIn = searchParams.get('checkIn');
   const initialCheckOut = searchParams.get('checkOut');
@@ -155,7 +156,7 @@ export function PropertyDetailPage() {
       }
     };
     fetchDetails();
-  }, [propertyId]);
+  }, [propertyId, lastUpdated]);
 
   const showErrorModal = (message: string) => {
     setBookingError(message);
@@ -226,9 +227,41 @@ export function PropertyDetailPage() {
       alert('Reserva confirmada!');
       setIsConfirmModalOpen(false);
       setDateRange(undefined);
+      setLastUpdated(Date.now());
     } catch (error) {
       console.error('Erro ao confirmar reserva:', error);
       let errorMessage = 'Falha ao criar reserva. Tente novamente.';
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      showErrorModal(errorMessage);
+    } finally {
+      setIsBookingLoading(false);
+    }
+  };
+
+  const handleUpdateReservation = () => {
+    showErrorModal("Função 'Atualizar Reserva' ainda não implementada.");
+  };
+
+  const handleCancelReservation = async (reservationId: string) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      showErrorModal('Você não está logado.');
+      return;
+    }
+
+    setIsBookingLoading(true);
+    try {
+      await axios.delete(`${API_URL}/reserve/${reservationId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('Reserva cancelada com sucesso!');
+      setDateRange(undefined);
+      setLastUpdated(Date.now());
+    } catch (error) {
+      console.error('Erro ao cancelar reserva:', error);
+      let errorMessage = 'Falha ao cancelar reserva.';
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -294,6 +327,9 @@ export function PropertyDetailPage() {
             onReserveClick={handleOpenReserveModal}
             disabledDates={disabledDates}
             userReservation={userReservation}
+            onUpdate={handleUpdateReservation}
+            onCancel={handleCancelReservation}
+            isLoading={isBookingLoading}
           />
         </div>
       </div>

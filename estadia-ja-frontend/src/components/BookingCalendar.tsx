@@ -10,6 +10,9 @@ type BookingCalendarProps = {
   onReserveClick: () => void;
   disabledDates: DateRange[];
   userReservation: Reservation | null;
+  onUpdate: () => void;
+  onCancel: (reservationId: string) => void;
+  isLoading: boolean;
 };
 
 export function BookingCalendar({
@@ -18,6 +21,9 @@ export function BookingCalendar({
   onReserveClick,
   disabledDates,
   userReservation,
+  onUpdate,
+  onCancel,
+  isLoading,
 }: BookingCalendarProps) {
   const today = startOfDay(new Date());
 
@@ -33,6 +39,7 @@ export function BookingCalendar({
           selected={dateRange}
           onSelect={setDateRange}
           disabled={[{ before: today }, ...disabledDates]}
+          min={1}
           numberOfMonths={1}
         />
       </div>
@@ -41,23 +48,33 @@ export function BookingCalendar({
         <div className='mt-4 space-y-3'>
           <button
             onClick={onReserveClick}
-            className='w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white hover:bg-opacity-90'
+            disabled={isLoading}
+            className='w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white hover:bg-opacity-90 disabled:opacity-50'
           >
-            Reservar noutra data?
+            Reservar em outra data?
           </button>
-          <button className='w-full rounded-full py-2 font-medium text-blue-600 hover:bg-blue-50'>
+          <button
+            onClick={onUpdate}
+            disabled={isLoading}
+            className='w-full rounded-full py-2 font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-50'
+          >
             Atualizar reserva
           </button>
-          <button className='w-full rounded-full py-2 font-medium text-red-600 hover:bg-red-50'>
-            Cancelar reserva
+          <button
+            onClick={() => onCancel(userReservation.id)}
+            disabled={isLoading}
+            className='w-full rounded-full py-2 font-medium text-red-600 hover:bg-red-50 disabled:opacity-50'
+          >
+            {isLoading ? 'Cancelando...' : 'Cancelar reserva'}
           </button>
         </div>
       ) : (
         <button
           onClick={onReserveClick}
-          className='mt-4 w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white hover:bg-opacity-90'
+          disabled={isLoading}
+          className='mt-4 w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white hover:bg-opacity-90 disabled:opacity-50'
         >
-          Reservar
+          {isLoading ? 'Processando...' : 'Reservar'}
         </button>
       )}
     </div>

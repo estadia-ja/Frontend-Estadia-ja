@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { type Property } from '../../components/ListingCard';
+import { type ReservationWithProperty } from '../../components/ReservationCard';
 import { ProfileHeader } from '../../components/ProfileHeader';
 import { ReservationsBlock } from '../../components/ReservationsBlock';
 import { BecomeOwnerBlock } from '../../components/BecomeOwnerBlock';
 import { AnalyticsBlock } from '../../components/AnalyticsBlock';
 import { MyPropertiesBlock } from '../../components/MyPropertiesBlock';
 import { OwnerReservationsBlock } from '../../components/OwnerReservationsBlock';
-import { Footer } from '../../components/Footer';
-import { Header } from '../../components/Header';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -24,12 +23,9 @@ export type User = {
   cpf: string;
   phones: Phone[];
   avatarUrl: string;
-  avgRating: string;
 };
 
-export type Reservation = {
-  id: string;
-};
+export type Reservation = ReservationWithProperty;
 
 export function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -112,14 +108,33 @@ export function ProfilePage() {
 
   const handleDeleteProperty = async (id: string) => {
     const token = localStorage.getItem('authToken');
-    try {
-      await axios.delete(`${API_URL}/property/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMyProperties((prev) => prev.filter((prop) => prop.id !== id));
-    } catch (error) {
-      console.error('Erro ao deletar imóvel:', error);
-      alert('Falha ao deletar imóvel.');
+    if (window.confirm('Tem certeza que deseja deletar este imóvel?')) {
+      try {
+        await axios.delete(`${API_URL}/property/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setMyProperties((prev) => prev.filter((prop) => prop.id !== id));
+      } catch (error) {
+        console.error('Erro ao deletar imóvel:', error);
+      }
+    }
+  };
+
+  const handleUpdateReservation = (id: string) => {
+    alert(`Função 'Atualizar Reserva' (ID: ${id}) não implementada.`);
+  };
+
+  const handleCancelReservation = async (id: string) => {
+    const token = localStorage.getItem('authToken');
+    if (window.confirm('Tem certeza que deseja cancelar esta reserva?')) {
+      try {
+        await axios.delete(`${API_URL}/reserve/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setMyReservations((prev) => prev.filter((res) => res.id !== id));
+      } catch (error) {
+        console.error('Erro ao cancelar reserva:', error);
+      }
     }
   };
 
@@ -144,30 +159,30 @@ export function ProfilePage() {
   const isOwner = myProperties && myProperties.length > 0;
 
   return (
-    <div>
-      <Header />
-      <div className='flex-grow bg-white p-4 md:p-8'>
-        <div className='container mx-auto max-w-7xl space-y-10'>
-          <ProfileHeader user={user} />
+    <div className='flex-grow bg-[#fff] p-4 md:p-8'>
+      <div className='container mx-auto max-w-7xl space-y-10'>
+        <ProfileHeader user={user} />
 
-          <ReservationsBlock reservations={myReservations} />
+        <ReservationsBlock
+          reservations={myReservations}
+          onUpdate={handleUpdateReservation}
+          onCancel={handleCancelReservation}
+        />
 
-          {!isOwner && <BecomeOwnerBlock />}
+        {!isOwner && <BecomeOwnerBlock />}
 
-          {isOwner && (
-            <>
-              <AnalyticsBlock />
-              <OwnerReservationsBlock reservations={ownerReservations} />
-              <MyPropertiesBlock
-                myProperties={myProperties}
-                onEdit={handleEditProperty}
-                onDelete={handleDeleteProperty}
-              />
-            </>
-          )}
-        </div>
+        {isOwner && (
+          <>
+            <AnalyticsBlock />
+            <OwnerReservationsBlock reservations={ownerReservations} />
+            <MyPropertiesBlock
+              myProperties={myProperties}
+              onEdit={handleEditProperty}
+              onDelete={handleDeleteProperty}
+            />
+          </>
+        )}
       </div>
-      <Footer />
     </div>
   );
 }
