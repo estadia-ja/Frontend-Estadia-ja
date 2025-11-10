@@ -5,12 +5,14 @@ type ReservationsBlockProps = {
   reservations: Reservation[];
   onUpdate: (id: string) => void;
   onCancel: (id: string) => void;
+  isLoading: boolean;
 };
 
 export function ReservationsBlock({
   reservations,
   onUpdate,
   onCancel,
+  isLoading,
 }: ReservationsBlockProps) {
   return (
     <div className='w-full rounded-lg bg-[#fff] p-6'>
@@ -25,6 +27,7 @@ export function ReservationsBlock({
               reservation={res}
               onUpdate={onUpdate}
               onCancel={onCancel}
+              isLoading={isLoading}
             />
           ))}
         </div>

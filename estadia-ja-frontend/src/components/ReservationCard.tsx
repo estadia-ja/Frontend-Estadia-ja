@@ -18,6 +18,7 @@ type ReservationCardProps = {
   reservation: ReservationWithProperty;
   onUpdate?: (id: string) => void;
   onCancel?: (id: string) => void;
+  isLoading?: boolean;
 };
 
 const formatDate = (date: string) => {
@@ -28,6 +29,7 @@ export function ReservationCard({
   reservation,
   onUpdate,
   onCancel,
+  isLoading = false,
 }: ReservationCardProps) {
   if (!reservation.property) {
     return (
@@ -69,17 +71,19 @@ export function ReservationCard({
         <div className='mt-auto flex border-t'>
           <button
             onClick={() => onUpdate(reservation.id)}
-            className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50'
+            disabled={isLoading}
+            className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50 disabled:opacity-50'
           >
             <Edit className='h-4 w-4' />
             Atualizar
           </button>
           <button
             onClick={() => onCancel(reservation.id)}
-            className='flex flex-1 items-center justify-center gap-2 border-l p-3 text-red-600 hover:bg-red-50'
+            disabled={isLoading}
+            className='flex flex-1 items-center justify-center gap-2 border-l p-3 text-red-600 hover:bg-red-50 disabled:opacity-50'
           >
             <Trash2 className='h-4 w-4' />
-            Cancelar
+            {isLoading ? '...' : 'Cancelar'}
           </button>
         </div>
       )}

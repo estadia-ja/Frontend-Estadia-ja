@@ -9,7 +9,11 @@ import { DescriptionBlock } from '../../components/DescriptionBlock';
 import { ReviewsBlock } from '../../components/ReviewsBlock';
 import { BookingCalendar } from '../../components/BookingCalendar';
 import { ConfirmReservationModal } from '../../components/modals/ConfirmReservationModal';
+import { Header } from '../../components/Header';
+import { Footer } from '../../components/Footer';
 import { ErrorModal } from '../../components/modals/ErrorModal';
+import { SuccessModal } from '../../components/modals/SuccessModal';
+import { ConfirmModal } from '../../components/modals/ConfirmModal';
 import { parseISO, isSameDay } from 'date-fns';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
@@ -75,7 +79,10 @@ export function PropertyDetailPage() {
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] =
+    useState(false);
+  const [modalMessage, setModalMessage] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -159,8 +166,13 @@ export function PropertyDetailPage() {
   }, [propertyId, lastUpdated]);
 
   const showErrorModal = (message: string) => {
-    setBookingError(message);
+    setModalMessage(message);
     setIsErrorModalOpen(true);
+  };
+
+  const showSuccessModal = (message: string) => {
+    setModalMessage(message);
+    setIsSuccessModalOpen(true);
   };
 
   const handleOpenReserveModal = () => {
@@ -224,7 +236,7 @@ export function PropertyDetailPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert('Reserva confirmada!');
+      showSuccessModal('Reserva confirmada!');
       setIsConfirmModalOpen(false);
       setDateRange(undefined);
       setLastUpdated(Date.now());
@@ -234,6 +246,7 @@ export function PropertyDetailPage() {
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
+      setIsConfirmModalOpen(false);
       showErrorModal(errorMessage);
     } finally {
       setIsBookingLoading(false);
@@ -244,10 +257,16 @@ export function PropertyDetailPage() {
     showErrorModal("Função 'Atualizar Reserva' ainda não implementada.");
   };
 
-  const handleCancelReservation = async (reservationId: string) => {
+  const handleCancelReservation = () => {
+    setIsConfirmCancelModalOpen(true);
+  };
+
+  const executeCancelReservation = async () => {
     const token = localStorage.getItem('authToken');
-    if (!token) {
-      showErrorModal('Você não está logado.');
+    const reservationId = userReservation?.id;
+
+    if (!token || !reservationId) {
+      showErrorModal('Você não está logado ou a reserva é inválida.');
       return;
     }
 
@@ -256,7 +275,7 @@ export function PropertyDetailPage() {
       await axios.delete(`${API_URL}/reserve/${reservationId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert('Reserva cancelada com sucesso!');
+      showSuccessModal('Reserva cancelada com sucesso!');
       setDateRange(undefined);
       setLastUpdated(Date.now());
     } catch (error) {
@@ -268,6 +287,7 @@ export function PropertyDetailPage() {
       showErrorModal(errorMessage);
     } finally {
       setIsBookingLoading(false);
+      setIsConfirmCancelModalOpen(false);
     }
   };
 
@@ -295,60 +315,83 @@ export function PropertyDetailPage() {
     .map((img) => `${API_URL}/property/image/${img.id}`);
 
   return (
-    <div className='container mx-auto max-w-7xl p-4 md:p-8'>
-      <div className='mb-4 flex items-start justify-between'>
-        <div>
-          <h1 className='text-3xl font-bold text-[#1D3557]'>{title}</h1>
-          <div className='mt-2 flex items-center gap-2'>
-            <Star className='h-5 w-5 fill-yellow-500 text-yellow-500' />
-            <span className='font-bold'>
-              {property.avgRating?.toFixed(1) || 'Novo'}
-            </span>
-            <span className='text-gray-600'>· {reviews.length} avaliações</span>
+    <>
+      <Header />
+      <div className='container mx-auto max-w-7xl p-4 md:p-8'>
+        <div className='mb-4 flex items-start justify-between'>
+          <div>
+            <h1 className='text-3xl font-bold text-[#1D3557]'>{title}</h1>
+            <div className='mt-2 flex items-center gap-2'>
+              <Star className='h-5 w-5 fill-yellow-500 text-yellow-500' />
+              <span className='font-bold'>
+                {property.avgRating?.toFixed(1) || 'Novo'}
+              </span>
+              <span className='text-gray-600'>
+                · {reviews.length} avaliações
+              </span>
+            </div>
+          </div>
+          <button className='rounded-full p-3 hover:bg-gray-100'>
+            <Heart className='h-6 w-6 text-[#1D3557]' />
+          </button>
+        </div>
+
+        <ImageGallery images={imagesToDisplay} />
+
+        <div className='mt-8 grid grid-cols-1 gap-12 lg:grid-cols-3'>
+          <div className='space-y-8 lg:col-span-2'>
+            <DescriptionBlock property={property} />
+            <ReviewsBlock reviews={reviews} />
+          </div>
+
+          <div className='lg:col-span-1'>
+            <BookingCalendar
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              onReserveClick={handleOpenReserveModal}
+              disabledDates={disabledDates}
+              userReservation={userReservation}
+              onUpdate={handleUpdateReservation}
+              onCancel={handleCancelReservation}
+              isLoading={isBookingLoading}
+            />
           </div>
         </div>
-        <button className='rounded-full p-3 hover:bg-gray-100'>
-          <Heart className='h-6 w-6 text-[#1D3557]' />
-        </button>
-      </div>
 
-      <ImageGallery images={imagesToDisplay} />
-
-      <div className='mt-8 grid grid-cols-1 gap-12 lg:grid-cols-3'>
-        <div className='space-y-8 lg:col-span-2'>
-          <DescriptionBlock property={property} />
-          <ReviewsBlock reviews={reviews} />
-        </div>
-
-        <div className='lg:col-span-1'>
-          <BookingCalendar
+        {isConfirmModalOpen && (
+          <ConfirmReservationModal
             dateRange={dateRange}
-            setDateRange={setDateRange}
-            onReserveClick={handleOpenReserveModal}
-            disabledDates={disabledDates}
-            userReservation={userReservation}
-            onUpdate={handleUpdateReservation}
-            onCancel={handleCancelReservation}
+            onClose={() => setIsConfirmModalOpen(false)}
+            onConfirm={handleConfirmReserve}
             isLoading={isBookingLoading}
           />
-        </div>
+        )}
+
+        {isConfirmCancelModalOpen && (
+          <ConfirmModal
+            title='Cancelar Reserva'
+            message='Tem certeza que deseja cancelar esta reserva?'
+            onClose={() => setIsConfirmCancelModalOpen(false)}
+            onConfirm={executeCancelReservation}
+            isLoading={isBookingLoading}
+          />
+        )}
+
+        {isErrorModalOpen && (
+          <ErrorModal
+            message={modalMessage}
+            onClose={() => setIsErrorModalOpen(false)}
+          />
+        )}
+
+        {isSuccessModalOpen && (
+          <SuccessModal
+            message={modalMessage}
+            onClose={() => setIsSuccessModalOpen(false)}
+          />
+        )}
       </div>
-
-      {isConfirmModalOpen && (
-        <ConfirmReservationModal
-          dateRange={dateRange}
-          onClose={() => setIsConfirmModalOpen(false)}
-          onConfirm={handleConfirmReserve}
-          isLoading={isBookingLoading}
-        />
-      )}
-
-      {isErrorModalOpen && (
-        <ErrorModal
-          message={bookingError}
-          onClose={() => setIsErrorModalOpen(false)}
-        />
-      )}
-    </div>
+      <Footer />
+    </>
   );
 }

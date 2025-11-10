@@ -9,6 +9,11 @@ import { BecomeOwnerBlock } from '../../components/BecomeOwnerBlock';
 import { AnalyticsBlock } from '../../components/AnalyticsBlock';
 import { MyPropertiesBlock } from '../../components/MyPropertiesBlock';
 import { OwnerReservationsBlock } from '../../components/OwnerReservationsBlock';
+import { ErrorModal } from '../../components/modals/ErrorModal';
+import { SuccessModal } from '../../components/modals/SuccessModal';
+import { ConfirmModal } from '../../components/modals/ConfirmModal';
+import { Header } from '../../components/Header';
+import { Footer } from '../../components/Footer';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -33,6 +38,15 @@ export function ProfilePage() {
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
   const [ownerReservations, setOwnerReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState<string | null>(null);
+  const [modalTitle, setModalTitle] = useState('');
+  const [onConfirmAction, setOnConfirmAction] = useState<
+    (() => Promise<void>) | null
+  >(null);
+  const [isActionLoading, setIsActionLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -41,6 +55,16 @@ export function ProfilePage() {
       return { data: [] };
     }
     throw error;
+  };
+
+  const showErrorModal = (message: string) => {
+    setModalMessage(message);
+    setIsErrorModalOpen(true);
+  };
+
+  const showSuccessModal = (message: string) => {
+    setModalMessage(message);
+    setIsSuccessModalOpen(true);
   };
 
   const fetchData = async () => {
@@ -107,34 +131,58 @@ export function ProfilePage() {
   };
 
   const handleDeleteProperty = async (id: string) => {
+    setModalTitle('Deletar Imóvel');
+    setModalMessage(
+      'Tem certeza que deseja deletar este imóvel? Esta ação é permanente.'
+    );
+    setOnConfirmAction(() => () => executeDeleteProperty(id));
+    setIsConfirmModalOpen(true);
+  };
+
+  const executeDeleteProperty = async (id: string) => {
+    setIsActionLoading(true);
     const token = localStorage.getItem('authToken');
-    if (window.confirm('Tem certeza que deseja deletar este imóvel?')) {
-      try {
-        await axios.delete(`${API_URL}/property/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setMyProperties((prev) => prev.filter((prop) => prop.id !== id));
-      } catch (error) {
-        console.error('Erro ao deletar imóvel:', error);
-      }
+    try {
+      await axios.delete(`${API_URL}/property/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMyProperties((prev) => prev.filter((prop) => prop.id !== id));
+      showSuccessModal('Imóvel deletado com sucesso.');
+    } catch (error) {
+      console.error('Erro ao deletar imóvel:', error);
+      showErrorModal('Falha ao deletar imóvel.');
+    } finally {
+      setIsConfirmModalOpen(false);
+      setIsActionLoading(false);
     }
   };
 
   const handleUpdateReservation = (id: string) => {
-    alert(`Função 'Atualizar Reserva' (ID: ${id}) não implementada.`);
+    showErrorModal(`Função 'Atualizar Reserva' (ID: ${id}) não implementada.`);
   };
 
-  const handleCancelReservation = async (id: string) => {
+  const handleCancelReservation = (id: string) => {
+    setModalTitle('Cancelar Reserva');
+    setModalMessage('Tem certeza que deseja cancelar esta reserva?');
+    setOnConfirmAction(() => () => executeCancelReservation(id));
+    setIsConfirmModalOpen(true);
+  };
+
+  const executeCancelReservation = async (id: string) => {
+    setIsActionLoading(true);
     const token = localStorage.getItem('authToken');
-    if (window.confirm('Tem certeza que deseja cancelar esta reserva?')) {
-      try {
-        await axios.delete(`${API_URL}/reserve/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setMyReservations((prev) => prev.filter((res) => res.id !== id));
-      } catch (error) {
-        console.error('Erro ao cancelar reserva:', error);
-      }
+    try {
+      await axios.delete(`${API_URL}/reserve/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMyReservations((prev) => prev.filter((res) => res.id !== id));
+      showSuccessModal('Reserva cancelada com sucesso.');
+    } catch (error) {
+      console.error('Erro ao cancelar reserva:', error);
+      showErrorModal('Falha ao cancelar reserva.');
+    } finally {
+      setIsConfirmModalOpen(false);
+      setIsActionLoading(false);
     }
   };
 
@@ -146,11 +194,23 @@ export function ProfilePage() {
     );
   }
 
-  if (apiError || !user) {
+  if (apiError && !user) {
+    return (
+      <ErrorModal
+        message={apiError}
+        onClose={() => {
+          setApiError(null);
+          navigate('/login');
+        }}
+      />
+    );
+  }
+
+  if (!user) {
     return (
       <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
         <p className='text-lg text-red-700'>
-          {apiError || 'Erro ao carregar dados do usuário.'}
+          Erro ao carregar dados do usuário.
         </p>
       </div>
     );
@@ -159,30 +219,61 @@ export function ProfilePage() {
   const isOwner = myProperties && myProperties.length > 0;
 
   return (
-    <div className='flex-grow bg-[#fff] p-4 md:p-8'>
-      <div className='container mx-auto max-w-7xl space-y-10'>
-        <ProfileHeader user={user} />
+    <>
+      <Header />
+      <div className='flex-grow bg-[#fff] p-4 md:p-8'>
+        <div className='container mx-auto max-w-7xl space-y-10'>
+          <ProfileHeader user={user} />
 
-        <ReservationsBlock
-          reservations={myReservations}
-          onUpdate={handleUpdateReservation}
-          onCancel={handleCancelReservation}
-        />
+          <ReservationsBlock
+            reservations={myReservations}
+            onUpdate={handleUpdateReservation}
+            onCancel={handleCancelReservation}
+            isLoading={isActionLoading}
+          />
 
-        {!isOwner && <BecomeOwnerBlock />}
+          {!isOwner && <BecomeOwnerBlock />}
 
-        {isOwner && (
-          <>
-            <AnalyticsBlock />
-            <OwnerReservationsBlock reservations={ownerReservations} />
-            <MyPropertiesBlock
-              myProperties={myProperties}
-              onEdit={handleEditProperty}
-              onDelete={handleDeleteProperty}
-            />
-          </>
-        )}
+          {isOwner && (
+            <>
+              <AnalyticsBlock />
+              <OwnerReservationsBlock
+                reservations={ownerReservations}
+                isLoading={isActionLoading}
+              />
+              <MyPropertiesBlock
+                myProperties={myProperties}
+                onEdit={handleEditProperty}
+                onDelete={handleDeleteProperty}
+              />
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      <Footer />
+      {isConfirmModalOpen && onConfirmAction && (
+        <ConfirmModal
+          title={modalTitle}
+          message={modalMessage || ''}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={onConfirmAction}
+          isLoading={isActionLoading}
+        />
+      )}
+
+      {isErrorModalOpen && (
+        <ErrorModal
+          message={modalMessage}
+          onClose={() => setIsErrorModalOpen(false)}
+        />
+      )}
+
+      {isSuccessModalOpen && (
+        <SuccessModal
+          message={modalMessage}
+          onClose={() => setIsSuccessModalOpen(false)}
+        />
+      )}
+    </>
   );
 }

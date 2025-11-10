@@ -1,11 +1,14 @@
 import { type Reservation } from '../pages/ProfilePage/index';
+import { ReservationCard } from './ReservationCard';
 
 type OwnerReservationsBlockProps = {
   reservations: Reservation[];
+  isLoading: boolean;
 };
 
 export function OwnerReservationsBlock({
   reservations,
+  isLoading,
 }: OwnerReservationsBlockProps) {
   return (
     <div className='w-full rounded-lg bg-white p-6'>
@@ -13,7 +16,15 @@ export function OwnerReservationsBlock({
         Reservas nos seus Imóveis
       </h3>
       {reservations.length > 0 ? (
-        <p>(Grid das Reservas recebidas)</p>
+        <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+          {reservations.map((res) => (
+            <ReservationCard
+              key={res.id}
+              reservation={res}
+              isLoading={isLoading}
+            />
+          ))}
+        </div>
       ) : (
         <p className='text-center text-gray-600'>
           Seus imóveis ainda não receberam nenhuma reserva.
