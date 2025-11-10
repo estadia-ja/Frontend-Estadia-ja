@@ -8,6 +8,9 @@ import { ImageGallery } from '../../components/ImageGallery';
 import { DescriptionBlock } from '../../components/DescriptionBlock';
 import { ReviewsBlock } from '../../components/ReviewsBlock';
 import { BookingCalendar } from '../../components/BookingCalendar';
+import { ConfirmReservationModal } from '../../components/modals/ConfirmReservationModal';
+import { ErrorModal } from '../../components/modals/ErrorModal';
+import { parseISO, isSameDay } from 'date-fns';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -16,41 +19,43 @@ export type PropertyUser = {
   name: string;
   avatarUrl?: string;
 };
-
 export type FullProperty = Property & {
   maxGuests: number;
   numberOfBedroom: number;
   numberOfBathroom: number;
   user: PropertyUser;
 };
-
 export type ReviewUser = {
   name: string;
   avatarUrl?: string;
 };
-
 export type Review = {
   id: string;
   rating: number;
   comment: string;
   user: ReviewUser;
 };
+export type Reservation = {
+  id: string;
+  dateStart: string;
+  dateEnd: string;
+  propertyId: string;
+  userId: string;
+};
 
 const getInitialDateRange = (
   checkIn: string | null,
   checkOut: string | null
 ): DateRange | undefined => {
-  console.log(checkIn, checkOut);
   if (checkIn && checkOut) {
     try {
       const from = new Date(checkIn.replace(/-/g, '/'));
       const to = new Date(checkOut.replace(/-/g, '/'));
-
       if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
         return { from, to };
       }
     } catch (error) {
-      console.error('Data da URL inválida:', error);
+      console.error(error);
       return undefined;
     }
   }
@@ -58,13 +63,23 @@ const getInitialDateRange = (
 };
 
 export function PropertyDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id: propertyId } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
 
   const [property, setProperty] = useState<FullProperty | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [disabledDates, setDisabledDates] = useState<DateRange[]>([]);
+  const [userReservation, setUserReservation] = useState<Reservation | null>(
+    null
+  );
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isBookingLoading, setIsBookingLoading] = useState(false);
 
   const initialCheckIn = searchParams.get('checkIn');
   const initialCheckOut = searchParams.get('checkOut');
@@ -82,24 +97,56 @@ export function PropertyDetailPage() {
 
   useEffect(() => {
     const fetchDetails = async () => {
-      if (!id) return;
+      if (!propertyId) return;
 
       setIsLoading(true);
       setApiError(null);
 
-      try {
-        const propertyPromise = axios.get(`${API_URL}/property/${id}`);
-        const reviewsPromise = axios
-          .get(`${API_URL}/property/${id}/valuations`)
-          .catch(handleFetchError);
+      const token = localStorage.getItem('authToken');
+      const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
-        const [propertyResponse, reviewsResponse] = await Promise.all([
+      try {
+        const propertyPromise = axios.get(`${API_URL}/property/${propertyId}`);
+        const reviewsPromise = axios
+          .get(`${API_URL}/property/${propertyId}/valuations`)
+          .catch(handleFetchError);
+        const allReservationsPromise = axios
+          .get(`${API_URL}/property/${propertyId}/reservations`)
+          .catch(handleFetchError);
+        const myReservationsPromise = token
+          ? axios
+              .get(`${API_URL}/reserve/my-reservations`, authHeaders)
+              .catch(handleFetchError)
+          : Promise.resolve({ data: [] });
+
+        const [
+          propertyResponse,
+          reviewsResponse,
+          allReservationsResponse,
+          myReservationsResponse,
+        ] = await Promise.all([
           propertyPromise,
           reviewsPromise,
+          allReservationsPromise,
+          myReservationsPromise,
         ]);
 
         setProperty(propertyResponse.data);
         setReviews(reviewsResponse.data || []);
+
+        const allReservations: Reservation[] =
+          allReservationsResponse.data || [];
+        const myReservations: Reservation[] = myReservationsResponse.data || [];
+
+        const disabledRanges = allReservations.map((res) => ({
+          from: parseISO(res.dateStart),
+          to: parseISO(res.dateEnd),
+        }));
+        setDisabledDates(disabledRanges);
+
+        const foundUserReservation =
+          myReservations.find((res) => res.propertyId === propertyId) || null;
+        setUserReservation(foundUserReservation);
       } catch (error) {
         console.error('Erro ao buscar detalhes:', error);
         setApiError('Não foi possível carregar os dados do imóvel.');
@@ -107,20 +154,88 @@ export function PropertyDetailPage() {
         setIsLoading(false);
       }
     };
-
     fetchDetails();
-  }, [id]);
+  }, [propertyId]);
 
-  const handleReserve = () => {
-    if (!dateRange?.from || !dateRange?.to) {
-      alert('Por favor, selecione as datas de check-in e check-out.');
+  const showErrorModal = (message: string) => {
+    setBookingError(message);
+    setIsErrorModalOpen(true);
+  };
+
+  const handleOpenReserveModal = () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      showErrorModal('Você precisa estar logado para fazer uma reserva.');
       return;
     }
-    console.log('Reservando...', {
-      propertyId: id,
-      from: dateRange.from,
-      to: dateRange.to,
-    });
+    if (!dateRange?.from || !dateRange?.to) {
+      showErrorModal('Por favor, selecione as datas de check-in e check-out.');
+      return;
+    }
+
+    if (isSameDay(dateRange.from, dateRange.to)) {
+      showErrorModal(
+        'A data de checkout deve ser pelo menos um dia depois do check-in.'
+      );
+      return;
+    }
+
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmReserve = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token || !dateRange?.from || !dateRange?.to || !propertyId) {
+      showErrorModal('Erro: dados da reserva incompletos.');
+      return;
+    }
+
+    setIsBookingLoading(true);
+    try {
+      const fromDate = dateRange.from;
+      const toDate = dateRange.to;
+
+      const checkInDateTime = new Date(
+        fromDate.getFullYear(),
+        fromDate.getMonth(),
+        fromDate.getDate(),
+        14,
+        0,
+        0
+      );
+      const checkOutDateTime = new Date(
+        toDate.getFullYear(),
+        toDate.getMonth(),
+        toDate.getDate(),
+        11,
+        0,
+        0
+      );
+
+      const payload = {
+        dateStart: checkInDateTime.toISOString(),
+        dateEnd: checkOutDateTime.toISOString(),
+      };
+
+      const apiUrl = `${API_URL}/property/${propertyId}/reserve`;
+
+      await axios.post(apiUrl, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert('Reserva confirmada!');
+      setIsConfirmModalOpen(false);
+      setDateRange(undefined);
+    } catch (error) {
+      console.error('Erro ao confirmar reserva:', error);
+      let errorMessage = 'Falha ao criar reserva. Tente novamente.';
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      showErrorModal(errorMessage);
+    } finally {
+      setIsBookingLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -129,10 +244,14 @@ export function PropertyDetailPage() {
     );
   }
 
-  if (apiError || !property) {
+  if (apiError && !property) {
+    return <ErrorModal message={apiError} onClose={() => setApiError(null)} />;
+  }
+
+  if (!property) {
     return (
       <div className='container mx-auto p-8 text-center text-red-600'>
-        {apiError}
+        Imóvel não encontrado.
       </div>
     );
   }
@@ -172,10 +291,28 @@ export function PropertyDetailPage() {
           <BookingCalendar
             dateRange={dateRange}
             setDateRange={setDateRange}
-            onReserve={handleReserve}
+            onReserveClick={handleOpenReserveModal}
+            disabledDates={disabledDates}
+            userReservation={userReservation}
           />
         </div>
       </div>
+
+      {isConfirmModalOpen && (
+        <ConfirmReservationModal
+          dateRange={dateRange}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={handleConfirmReserve}
+          isLoading={isBookingLoading}
+        />
+      )}
+
+      {isErrorModalOpen && (
+        <ErrorModal
+          message={bookingError}
+          onClose={() => setIsErrorModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
