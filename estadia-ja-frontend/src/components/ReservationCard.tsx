@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Edit, Trash2, DollarSign } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { type Property } from './ListingCard';
@@ -12,12 +12,14 @@ export type ReservationWithProperty = {
   dateStart: string;
   dateEnd: string;
   property: Property;
+  status: string;
 };
 
 type ReservationCardProps = {
   reservation: ReservationWithProperty;
   onUpdate?: (id: string) => void;
   onCancel?: (id: string) => void;
+  onPay?: (reservation: ReservationWithProperty) => void;
   isLoading?: boolean;
 };
 
@@ -29,6 +31,7 @@ export function ReservationCard({
   reservation,
   onUpdate,
   onCancel,
+  onPay,
   isLoading = false,
 }: ReservationCardProps) {
   if (!reservation.property) {
@@ -42,6 +45,11 @@ export function ReservationCard({
   const imageUrl = firstImageId
     ? `${API_URL}/property/image/${firstImageId}`
     : `https://placehold.co/600x400/457B9D/FFFFFF?text=${reservation.property.type}`;
+
+  const isPaid = reservation.status === 'PAGA';
+  const isConfirmed = reservation.status === 'CONFIRMADA';
+  const showPaymentButton = onPay && isConfirmed;
+  const showManageButtons = onUpdate && onCancel && isPaid;
 
   return (
     <div className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'>
@@ -64,29 +72,51 @@ export function ReservationCard({
               {formatDate(reservation.dateEnd)}
             </span>
           </div>
+          <span
+            className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+              isPaid
+                ? 'bg-green-100 text-green-800'
+                : 'bg-yellow-100 text-yellow-800'
+            }`}
+          >
+            {reservation.status}
+          </span>
         </div>
       </Link>
 
-      {onUpdate && onCancel && (
-        <div className='mt-auto flex border-t'>
+      <div className='mt-auto flex border-t'>
+        {showManageButtons && (
+          <>
+            <button
+              onClick={() => onUpdate!(reservation.id)}
+              disabled={isLoading}
+              className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50 disabled:opacity-50'
+            >
+              <Edit className='h-4 w-4' />
+              Atualizar
+            </button>
+            <button
+              onClick={() => onCancel!(reservation.id)}
+              disabled={isLoading}
+              className='flex flex-1 items-center justify-center gap-2 border-l p-3 text-red-600 hover:bg-red-50 disabled:opacity-50'
+            >
+              <Trash2 className='h-4 w-4' />
+              {isLoading ? '...' : 'Cancelar'}
+            </button>
+          </>
+        )}
+
+        {showPaymentButton && (
           <button
-            onClick={() => onUpdate(reservation.id)}
+            onClick={() => onPay!(reservation)}
             disabled={isLoading}
-            className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50 disabled:opacity-50'
+            className='flex flex-1 items-center justify-center gap-2 p-3 text-green-600 hover:bg-green-50 disabled:opacity-50'
           >
-            <Edit className='h-4 w-4' />
-            Atualizar
+            <DollarSign className='h-4 w-4' />
+            Pagar Reserva
           </button>
-          <button
-            onClick={() => onCancel(reservation.id)}
-            disabled={isLoading}
-            className='flex flex-1 items-center justify-center gap-2 border-l p-3 text-red-600 hover:bg-red-50 disabled:opacity-50'
-          >
-            <Trash2 className='h-4 w-4' />
-            {isLoading ? '...' : 'Cancelar'}
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

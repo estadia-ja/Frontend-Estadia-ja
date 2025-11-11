@@ -5,6 +5,7 @@ type ReservationsBlockProps = {
   reservations: Reservation[];
   onUpdate: (id: string) => void;
   onCancel: (id: string) => void;
+  onPay: (reservation: Reservation) => void;
   isLoading: boolean;
 };
 
@@ -12,6 +13,7 @@ export function ReservationsBlock({
   reservations,
   onUpdate,
   onCancel,
+  onPay,
   isLoading,
 }: ReservationsBlockProps) {
   return (
@@ -27,6 +29,7 @@ export function ReservationsBlock({
               reservation={res}
               onUpdate={onUpdate}
               onCancel={onCancel}
+              onPay={onPay}
               isLoading={isLoading}
             />
           ))}

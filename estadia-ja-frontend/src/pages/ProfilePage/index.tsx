@@ -13,6 +13,7 @@ import { ErrorModal } from '../../components/modals/ErrorModal';
 import { SuccessModal } from '../../components/modals/SuccessModal';
 import { ConfirmModal } from '../../components/modals/ConfirmModal';
 import { UpdateReservationModal } from '../../components/modals/UpdateReservationModal';
+import { PaymentModal } from '../../components/modals/PaymentModal';
 import { type DateRange } from 'react-day-picker';
 import { isSameDay } from 'date-fns';
 import { Header } from '../../components/Header';
@@ -45,6 +46,10 @@ export function ProfilePage() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [reservationToPay, setReservationToPay] = useState<Reservation | null>(
+    null
+  );
   const [reservationToUpdate, setReservationToUpdate] =
     useState<Reservation | null>(null);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
@@ -257,6 +262,42 @@ export function ProfilePage() {
     }
   };
 
+  const handleOpenPayModal = (reservation: Reservation) => {
+    setReservationToPay(reservation);
+    setIsPaymentModalOpen(true);
+  };
+
+  const executePayment = async (paymentMethod: string) => {
+    const token = localStorage.getItem('authToken');
+    const reservationId = reservationToPay?.id;
+
+    if (!token || !reservationId) {
+      showErrorModal('Erro: não foi possível identificar a reserva.');
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      const payload = { paymentMethod };
+      await axios.post(`${API_URL}/reserve/${reservationId}/payment`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      showSuccessModal('Pagamento efetuado com sucesso!');
+      fetchData();
+    } catch (error) {
+      console.error('Erro ao processar pagamento:', error);
+      let errorMessage = 'Falha ao processar pagamento.';
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      showErrorModal(errorMessage);
+    } finally {
+      setIsPaymentModalOpen(false);
+      setIsActionLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
@@ -300,6 +341,7 @@ export function ProfilePage() {
             reservations={myReservations}
             onUpdate={handleUpdateReservation}
             onCancel={handleCancelReservation}
+            onPay={handleOpenPayModal}
             isLoading={isActionLoading}
           />
 
@@ -352,6 +394,15 @@ export function ProfilePage() {
           onConfirm={executeUpdateReservation}
           isLoading={isActionLoading}
           disabledDates={[]}
+        />
+      )}
+
+      {isPaymentModalOpen && reservationToPay && (
+        <PaymentModal
+          reservation={reservationToPay}
+          onClose={() => setIsPaymentModalOpen(false)}
+          onConfirm={executePayment}
+          isLoading={isActionLoading}
         />
       )}
     </>
