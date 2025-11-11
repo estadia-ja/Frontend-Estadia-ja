@@ -14,6 +14,7 @@ import { Footer } from '../../components/Footer';
 import { ErrorModal } from '../../components/modals/ErrorModal';
 import { SuccessModal } from '../../components/modals/SuccessModal';
 import { ConfirmModal } from '../../components/modals/ConfirmModal';
+import { UpdateReservationModal } from '../../components/modals/UpdateReservationModal';
 import { parseISO, isSameDay } from 'date-fns';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
@@ -76,22 +77,19 @@ export function PropertyDetailPage() {
   const [userReservation, setUserReservation] = useState<Reservation | null>(
     null
   );
-
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] =
     useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
-
   const [isLoading, setIsLoading] = useState(true);
   const [isBookingLoading, setIsBookingLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(0);
-
   const initialCheckIn = searchParams.get('checkIn');
   const initialCheckOut = searchParams.get('checkOut');
-
   const [dateRange, setDateRange] = useState<DateRange | undefined>(
     getInitialDateRange(initialCheckIn, initialCheckOut)
   );
@@ -254,7 +252,68 @@ export function PropertyDetailPage() {
   };
 
   const handleUpdateReservation = () => {
-    showErrorModal("Função 'Atualizar Reserva' ainda não implementada.");
+    setIsUpdateModalOpen(true);
+  };
+
+  const executeUpdateReservation = async (newDateRange: DateRange) => {
+    const token = localStorage.getItem('authToken');
+    const reservationId = userReservation?.id;
+
+    if (!token || !reservationId || !newDateRange.from || !newDateRange.to) {
+      showErrorModal('Erro: dados da atualização incompletos.');
+      return;
+    }
+
+    if (isSameDay(newDateRange.from, newDateRange.to)) {
+      showErrorModal(
+        'A data de checkout deve ser pelo menos um dia depois do check-in.'
+      );
+      return;
+    }
+
+    setIsBookingLoading(true);
+    try {
+      const fromDate = newDateRange.from;
+      const toDate = newDateRange.to;
+      const checkInDateTime = new Date(
+        fromDate.getFullYear(),
+        fromDate.getMonth(),
+        fromDate.getDate(),
+        14,
+        0,
+        0
+      );
+      const checkOutDateTime = new Date(
+        toDate.getFullYear(),
+        toDate.getMonth(),
+        toDate.getDate(),
+        11,
+        0,
+        0
+      );
+
+      const payload = {
+        dateStart: checkInDateTime.toISOString(),
+        dateEnd: checkOutDateTime.toISOString(),
+      };
+
+      await axios.put(`${API_URL}/reserve/${reservationId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      showSuccessModal('Reserva atualizada com sucesso!');
+      setLastUpdated(Date.now());
+    } catch (error) {
+      console.error('Erro ao atualizar reserva:', error);
+      let errorMessage = 'Falha ao atualizar reserva.';
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      showErrorModal(errorMessage);
+    } finally {
+      setIsBookingLoading(false);
+      setIsUpdateModalOpen(false);
+    }
   };
 
   const handleCancelReservation = () => {
@@ -388,6 +447,17 @@ export function PropertyDetailPage() {
           <SuccessModal
             message={modalMessage}
             onClose={() => setIsSuccessModalOpen(false)}
+          />
+        )}
+
+        {isUpdateModalOpen && (
+          <UpdateReservationModal
+            onClose={() => setIsUpdateModalOpen(false)}
+            onConfirm={executeUpdateReservation}
+            isLoading={isBookingLoading}
+            disabledDates={disabledDates.filter(
+              (d) => d.from?.toISOString() !== userReservation?.dateStart
+            )}
           />
         )}
       </div>

@@ -12,6 +12,9 @@ import { OwnerReservationsBlock } from '../../components/OwnerReservationsBlock'
 import { ErrorModal } from '../../components/modals/ErrorModal';
 import { SuccessModal } from '../../components/modals/SuccessModal';
 import { ConfirmModal } from '../../components/modals/ConfirmModal';
+import { UpdateReservationModal } from '../../components/modals/UpdateReservationModal';
+import { type DateRange } from 'react-day-picker';
+import { isSameDay } from 'date-fns';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 
@@ -41,6 +44,9 @@ export function ProfilePage() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [reservationToUpdate, setReservationToUpdate] =
+    useState<Reservation | null>(null);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const [modalTitle, setModalTitle] = useState('');
   const [onConfirmAction, setOnConfirmAction] = useState<
@@ -158,7 +164,72 @@ export function ProfilePage() {
   };
 
   const handleUpdateReservation = (id: string) => {
-    showErrorModal(`Função 'Atualizar Reserva' (ID: ${id}) não implementada.`);
+    const reservation = myReservations.find((r) => r.id === id);
+    if (reservation) {
+      setReservationToUpdate(reservation);
+      setIsUpdateModalOpen(true);
+    }
+  };
+
+  const executeUpdateReservation = async (newDateRange: DateRange) => {
+    const token = localStorage.getItem('authToken');
+    const reservationId = reservationToUpdate?.id;
+
+    if (!token || !reservationId || !newDateRange.from || !newDateRange.to) {
+      showErrorModal('Erro: dados da atualização incompletos.');
+      return;
+    }
+
+    if (isSameDay(newDateRange.from, newDateRange.to)) {
+      showErrorModal(
+        'A data de checkout deve ser pelo menos um dia depois do check-in.'
+      );
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      const fromDate = newDateRange.from;
+      const toDate = newDateRange.to;
+      const checkInDateTime = new Date(
+        fromDate.getFullYear(),
+        fromDate.getMonth(),
+        fromDate.getDate(),
+        14,
+        0,
+        0
+      );
+      const checkOutDateTime = new Date(
+        toDate.getFullYear(),
+        toDate.getMonth(),
+        toDate.getDate(),
+        11,
+        0,
+        0
+      );
+
+      const payload = {
+        dateStart: checkInDateTime.toISOString(),
+        dateEnd: checkOutDateTime.toISOString(),
+      };
+
+      await axios.put(`${API_URL}/reserve/${reservationId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      showSuccessModal('Reserva atualizada com sucesso!');
+      fetchData();
+    } catch (error) {
+      console.error('Erro ao atualizar reserva:', error);
+      let errorMessage = 'Falha ao atualizar reserva.';
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      showErrorModal(errorMessage);
+    } finally {
+      setIsActionLoading(false);
+      setIsUpdateModalOpen(false);
+    }
   };
 
   const handleCancelReservation = (id: string) => {
@@ -272,6 +343,15 @@ export function ProfilePage() {
         <SuccessModal
           message={modalMessage}
           onClose={() => setIsSuccessModalOpen(false)}
+        />
+      )}
+
+      {isUpdateModalOpen && (
+        <UpdateReservationModal
+          onClose={() => setIsUpdateModalOpen(false)}
+          onConfirm={executeUpdateReservation}
+          isLoading={isActionLoading}
+          disabledDates={[]}
         />
       )}
     </>
