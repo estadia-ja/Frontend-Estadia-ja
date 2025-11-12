@@ -6,8 +6,6 @@ type ReviewCardProps = {
   review: Review;
 };
 
-
-
 export function ReviewCard({ review }: ReviewCardProps) {
   return (
     <div className='rounded-lg bg-[#fff] p-6 shadow-md'>

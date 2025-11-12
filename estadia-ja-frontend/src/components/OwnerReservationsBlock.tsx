@@ -4,11 +4,13 @@ import { ReservationCard } from './ReservationCard';
 type OwnerReservationsBlockProps = {
   reservations: Reservation[];
   isLoading: boolean;
+  onRateClient: (reservation: Reservation) => void;
 };
 
 export function OwnerReservationsBlock({
   reservations,
   isLoading,
+  onRateClient,
 }: OwnerReservationsBlockProps) {
   return (
     <div className='w-full rounded-lg bg-white p-6'>
@@ -22,6 +24,7 @@ export function OwnerReservationsBlock({
               key={res.id}
               reservation={res}
               isLoading={isLoading}
+              onRateClient={onRateClient}
             />
           ))}
         </div>

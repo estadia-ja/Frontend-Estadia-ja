@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { X, Star } from 'lucide-react';
+import { X, Star, UserCheck } from 'lucide-react';
 
-type RatingModalProps = {
+type ClientRatingModalProps = {
   onClose: () => void;
   onConfirm: (rating: number, comment: string) => void;
   isLoading: boolean;
 };
 
-export function RatingModal({
+export function ClientRatingModal({
   onClose,
   onConfirm,
   isLoading,
-}: RatingModalProps) {
+}: ClientRatingModalProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -25,9 +25,7 @@ export function RatingModal({
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
       <div className='flex w-full max-w-lg flex-col rounded-2xl bg-white p-6 shadow-xl'>
         <div className='mb-4 flex items-center justify-between'>
-          <h2 className='text-xl font-bold text-[#1D3557]'>
-            Avalie sua Estadia
-          </h2>
+          <h2 className='text-xl font-bold text-[#1D3557]'>Avalie o Hóspede</h2>
           <button
             onClick={onClose}
             className='rounded-full p-2 hover:bg-gray-200'
@@ -38,7 +36,7 @@ export function RatingModal({
         </div>
 
         <p className='mb-4 text-lg text-gray-700'>
-          Como foi sua experiência? Deixe uma nota e um comentário.
+          Como foi a experiência com este hóspede?
         </p>
 
         <div className='mb-6 flex items-center justify-center gap-2'>
@@ -66,16 +64,17 @@ export function RatingModal({
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder='Escreva seu comentário (opcional)...'
+          placeholder='Escreva seu comentário sobre o hóspede...'
           className='h-32 w-full rounded-lg bg-gray-100 p-4 text-gray-800 outline-none transition-all focus:ring-2 focus:ring-[#1D3557]'
         />
 
         <button
           onClick={handleConfirm}
           disabled={isLoading || rating === 0}
-          className='mt-6 w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white hover:bg-opacity-90 disabled:opacity-50'
+          className='mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white hover:bg-opacity-90 disabled:opacity-50'
         >
           {isLoading ? 'Enviando...' : 'Enviar Avaliação'}
+          <UserCheck className='h-5 w-5' />
         </button>
       </div>
     </div>

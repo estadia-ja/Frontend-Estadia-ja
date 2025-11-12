@@ -1,6 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Edit, Trash2, DollarSign, Star, CheckCircle } from 'lucide-react';
+import {
+  Calendar,
+  Edit,
+  Trash2,
+  DollarSign,
+  Star,
+  UserCheck,
+  CheckCircle,
+} from 'lucide-react';
 import { format, parseISO, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { type Property } from './ListingCard';
@@ -14,6 +22,7 @@ export type ReservationWithProperty = {
   property: Property;
   status: string;
   propertyValuation: { id: string } | null;
+  clientValuation: { id: string } | null;
 };
 
 type ReservationCardProps = {
@@ -22,6 +31,7 @@ type ReservationCardProps = {
   onCancel?: (id: string) => void;
   onPay?: (reservation: ReservationWithProperty) => void;
   onRate?: (reservation: ReservationWithProperty) => void;
+  onRateClient?: (reservation: ReservationWithProperty) => void;
   isLoading?: boolean;
 };
 
@@ -35,6 +45,7 @@ export function ReservationCard({
   onCancel,
   onPay,
   onRate,
+  onRateClient,
   isLoading = false,
 }: ReservationCardProps) {
   if (!reservation.property) {
@@ -50,13 +61,22 @@ export function ReservationCard({
     : `https://placehold.co/600x400/457B9D/FFFFFF?text=${reservation.property.type}`;
 
   const checkInDate = parseISO(reservation.dateStart);
+  const checkOutDate = parseISO(reservation.dateEnd);
   const isCheckInPastOrToday = isPast(checkInDate) || isToday(checkInDate);
+  const isCheckOutPast = isPast(checkOutDate);
   const isPaid = reservation.status === 'PAGA';
   const isConfirmed = reservation.status === 'CONFIRMADA';
   const showPaymentButton = onPay && isConfirmed;
-  const showManageButtons = onUpdate && onCancel && isPaid;
-  const showRateButton = onRate && reservation.status === 'PAGA' && isCheckInPastOrToday && !reservation.propertyValuation;
-  const showRatedButton = reservation.status === 'PAGA' && isCheckInPastOrToday && reservation.propertyValuation;
+  const showManageButtons =
+    onUpdate && onCancel && isPaid && !isCheckInPastOrToday;
+  const showPropertyRateButton =
+    onRate && isPaid && isCheckInPastOrToday && !reservation.propertyValuation;
+  const showPropertyRatedButton =
+    onRate && isPaid && isCheckInPastOrToday && reservation.propertyValuation;
+  const showClientRateButton =
+    onRateClient && isCheckOutPast && !reservation.clientValuation;
+  const showClientRatedButton =
+    onRateClient && isCheckOutPast && reservation.clientValuation;
 
   return (
     <div className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'>
@@ -123,8 +143,8 @@ export function ReservationCard({
             Pagar Reserva
           </button>
         )}
-        
-        {showRateButton && (
+
+        {showPropertyRateButton && (
           <button
             onClick={() => onRate!(reservation)}
             disabled={isLoading}
@@ -134,11 +154,29 @@ export function ReservationCard({
             Avaliar Estadia
           </button>
         )}
-        
-        {showRatedButton && (
-           <div className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'>
+
+        {showPropertyRatedButton && (
+          <div className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'>
             <CheckCircle className='h-4 w-4 text-green-500' />
             <span>Avaliado</span>
+          </div>
+        )}
+
+        {showClientRateButton && (
+          <button
+            onClick={() => onRateClient!(reservation)}
+            disabled={isLoading}
+            className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50 disabled:opacity-50'
+          >
+            <UserCheck className='h-4 w-4' />
+            Avaliar Hóspede
+          </button>
+        )}
+
+        {showClientRatedButton && (
+          <div className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'>
+            <CheckCircle className='h-4 w-4 text-green-500' />
+            <span>Hóspede Avaliado</span>
           </div>
         )}
       </div>
