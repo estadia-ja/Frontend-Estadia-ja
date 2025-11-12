@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Edit, Trash2, DollarSign } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { Calendar, Edit, Trash2, DollarSign, Star, CheckCircle } from 'lucide-react';
+import { format, parseISO, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { type Property } from './ListingCard';
 
@@ -13,6 +13,7 @@ export type ReservationWithProperty = {
   dateEnd: string;
   property: Property;
   status: string;
+  propertyValuation: { id: string } | null;
 };
 
 type ReservationCardProps = {
@@ -20,6 +21,7 @@ type ReservationCardProps = {
   onUpdate?: (id: string) => void;
   onCancel?: (id: string) => void;
   onPay?: (reservation: ReservationWithProperty) => void;
+  onRate?: (reservation: ReservationWithProperty) => void;
   isLoading?: boolean;
 };
 
@@ -32,6 +34,7 @@ export function ReservationCard({
   onUpdate,
   onCancel,
   onPay,
+  onRate,
   isLoading = false,
 }: ReservationCardProps) {
   if (!reservation.property) {
@@ -46,10 +49,14 @@ export function ReservationCard({
     ? `${API_URL}/property/image/${firstImageId}`
     : `https://placehold.co/600x400/457B9D/FFFFFF?text=${reservation.property.type}`;
 
+  const checkInDate = parseISO(reservation.dateStart);
+  const isCheckInPastOrToday = isPast(checkInDate) || isToday(checkInDate);
   const isPaid = reservation.status === 'PAGA';
   const isConfirmed = reservation.status === 'CONFIRMADA';
   const showPaymentButton = onPay && isConfirmed;
   const showManageButtons = onUpdate && onCancel && isPaid;
+  const showRateButton = onRate && reservation.status === 'PAGA' && isCheckInPastOrToday && !reservation.propertyValuation;
+  const showRatedButton = reservation.status === 'PAGA' && isCheckInPastOrToday && reservation.propertyValuation;
 
   return (
     <div className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'>
@@ -115,6 +122,24 @@ export function ReservationCard({
             <DollarSign className='h-4 w-4' />
             Pagar Reserva
           </button>
+        )}
+        
+        {showRateButton && (
+          <button
+            onClick={() => onRate!(reservation)}
+            disabled={isLoading}
+            className='flex flex-1 items-center justify-center gap-2 p-3 text-yellow-600 hover:bg-yellow-50 disabled:opacity-50'
+          >
+            <Star className='h-4 w-4' />
+            Avaliar Estadia
+          </button>
+        )}
+        
+        {showRatedButton && (
+           <div className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'>
+            <CheckCircle className='h-4 w-4 text-green-500' />
+            <span>Avaliado</span>
+          </div>
         )}
       </div>
     </div>

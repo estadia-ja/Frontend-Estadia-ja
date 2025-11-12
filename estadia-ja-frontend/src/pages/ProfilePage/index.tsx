@@ -14,6 +14,7 @@ import { SuccessModal } from '../../components/modals/SuccessModal';
 import { ConfirmModal } from '../../components/modals/ConfirmModal';
 import { UpdateReservationModal } from '../../components/modals/UpdateReservationModal';
 import { PaymentModal } from '../../components/modals/PaymentModal';
+import { RatingModal } from '../../components/modals/RatingModal';
 import { type DateRange } from 'react-day-picker';
 import { isSameDay } from 'date-fns';
 import { Header } from '../../components/Header';
@@ -45,6 +46,8 @@ export function ProfilePage() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [reservationToRate, setReservationToRate] = useState<Reservation | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [reservationToPay, setReservationToPay] = useState<Reservation | null>(
@@ -298,6 +301,46 @@ export function ProfilePage() {
     }
   };
 
+  const handleOpenRatingModal = (reservation: Reservation) => {
+    setReservationToRate(reservation);
+    setIsRatingModalOpen(true);
+  };
+
+  const executeCreateRating = async (rating: number, comment: string) => {
+    const token = localStorage.getItem("authToken");
+    const reservationId = reservationToRate?.id;
+    if (!token || !reservationId) {
+      showErrorModal("Erro: não foi possível identificar a reserva.");
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      console.log(rating)
+      const payload = { 
+        "noteProperty":rating, 
+        "commentProperty":comment 
+      };
+      await axios.post(`${API_URL}/reserve/${reservationId}/property-valuation`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      showSuccessModal("Avaliação enviada com sucesso!");
+      fetchData(); 
+
+    } catch (error) {
+      console.error("Erro ao enviar avaliação:", error);
+      let errorMessage = "Falha ao enviar avaliação.";
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      showErrorModal(errorMessage);
+    } finally {
+      setIsRatingModalOpen(false);
+      setIsActionLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
@@ -342,6 +385,7 @@ export function ProfilePage() {
             onUpdate={handleUpdateReservation}
             onCancel={handleCancelReservation}
             onPay={handleOpenPayModal}
+            onRate={handleOpenRatingModal}
             isLoading={isActionLoading}
           />
 
@@ -402,6 +446,14 @@ export function ProfilePage() {
           reservation={reservationToPay}
           onClose={() => setIsPaymentModalOpen(false)}
           onConfirm={executePayment}
+          isLoading={isActionLoading}
+        />
+      )}
+
+      {isRatingModalOpen && reservationToRate && (
+        <RatingModal
+          onClose={() => setIsRatingModalOpen(false)}
+          onConfirm={executeCreateRating}
           isLoading={isActionLoading}
         />
       )}

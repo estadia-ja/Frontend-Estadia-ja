@@ -36,8 +36,8 @@ export type ReviewUser = {
 };
 export type Review = {
   id: string;
-  rating: number;
-  comment: string;
+  noteProperty: number;
+  commentProperty: string;
   user: ReviewUser;
 };
 export type Reservation = {
