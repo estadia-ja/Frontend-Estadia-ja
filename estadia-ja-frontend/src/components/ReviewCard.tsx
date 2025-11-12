@@ -26,12 +26,12 @@ export function ReviewCard({ review }: ReviewCardProps) {
           </h4>
         </div>
       </div>
-      <p className='mb-3 text-gray-800'>"{review.commentProperty}"</p>
+      <p className='mb-3 text-gray-800'>"{review.comment}"</p>
       <div className='flex'>
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-5 w-5 ${i < review.noteProperty ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`}
+            className={`h-5 w-5 ${i < review.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`}
           />
         ))}
       </div>

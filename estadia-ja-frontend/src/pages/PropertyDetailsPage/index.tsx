@@ -36,9 +36,12 @@ export type ReviewUser = {
 };
 export type Review = {
   id: string;
-  noteProperty: number;
-  commentProperty: string;
-  user: ReviewUser;
+  rating: number;
+  comment: string;
+  user: {
+    id:string;
+    name:string;
+  };
 };
 export type Reservation = {
   id: string;
