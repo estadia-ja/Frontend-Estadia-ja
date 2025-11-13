@@ -41,6 +41,7 @@ export type Review = {
   user: {
     id: string;
     name: string;
+    avatarUrl:string;
   };
 };
 export type Reservation = {

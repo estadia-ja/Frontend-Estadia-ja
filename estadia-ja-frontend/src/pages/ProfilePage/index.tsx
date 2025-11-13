@@ -34,6 +34,7 @@ export type User = {
   cpf: string;
   phones: Phone[];
   avatarUrl: string;
+  avgRating:string;
 };
 
 export type Reservation = ReservationWithProperty;
