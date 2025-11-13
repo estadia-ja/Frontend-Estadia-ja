@@ -1,5 +1,5 @@
 // src/components/modals/DestinationModal.tsx (Atualizado)
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, MapPin, Search } from 'lucide-react';
 
 type DestinationModalProps = {

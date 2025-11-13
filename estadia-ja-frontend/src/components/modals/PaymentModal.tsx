@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, CreditCard, Banknote, QrCode } from 'lucide-react';
 import { type Reservation } from '../../pages/ProfilePage/index';
 import { differenceInCalendarDays, parseISO } from 'date-fns';

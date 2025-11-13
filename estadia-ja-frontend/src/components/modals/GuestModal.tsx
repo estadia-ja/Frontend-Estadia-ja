@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, UsersRound, Plus, Minus } from 'lucide-react';
 
 type GuestsModalProps = {
