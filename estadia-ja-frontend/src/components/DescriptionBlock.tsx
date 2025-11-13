@@ -1,4 +1,3 @@
-import React from 'react';
 import { User, Bed, Bath } from 'lucide-react';
 import { type FullProperty } from '../pages/PropertyDetailsPage/index.tsx';
 

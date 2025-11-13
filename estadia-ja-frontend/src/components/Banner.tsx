@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function Banner() {
   return (
     <div className='relative flex min-h-[400px] w-full items-center justify-center md:min-h-[600px]'>

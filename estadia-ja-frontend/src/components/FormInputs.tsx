@@ -1,5 +1,3 @@
-import React from 'react';
-
 type InputTextProps = {
   label: string;
   value: string;
