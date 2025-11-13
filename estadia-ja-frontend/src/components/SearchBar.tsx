@@ -1,5 +1,5 @@
 // src/components/SearchBar/index.tsx (Atualizado)
-import React from 'react';
+
 import { Search } from 'lucide-react';
 
 type SearchBarProps = {

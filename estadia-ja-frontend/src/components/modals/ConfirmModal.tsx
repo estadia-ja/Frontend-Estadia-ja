@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { X, AlertTriangle } from 'lucide-react';
 
 type ConfirmModalProps = {

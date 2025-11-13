@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ImageUp } from 'lucide-react';
 import { InputText, InputCheckbox } from './FormInputs';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ListingCard, type Property } from './ListingCard';
 
 type ListingGridProps = {
