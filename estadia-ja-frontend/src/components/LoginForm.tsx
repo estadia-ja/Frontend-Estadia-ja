@@ -39,7 +39,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiMessage, setApiMessage] = useState({ type: '', text: '' });
 
-  const { login } = useAuth(); // 2. PEGUE A FUNÇÃO 'login' DO CONTEXTO
+  const { login } = useAuth(); 
 
   const validatedForm = () => {
     setEmailError('');
@@ -198,7 +198,7 @@ export function LoginForm() {
 
           <div className='mt-4 flex justify-between text-sm font-medium text-[#1D3557]'>
             <a href='#' className='hover:underline'>
-              Esqueci minha senha
+              {/* Esqueci minha senha */}
             </a>
             <Link to='/cadastro' className='hover:underline'>
               Criar conta
