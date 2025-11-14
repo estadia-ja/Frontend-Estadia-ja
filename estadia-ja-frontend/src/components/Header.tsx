@@ -1,31 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Home, Heart, UserRound, Menu, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { Home, Heart, UserRound, Menu, X, LogOut, User } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    const token = localStorage.getItem('authToken');
-    return !!token;
-  });
+  const { isLoggedIn, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleStorageChange = () => {
-      const token = localStorage.getItem('authToken');
-      setIsLoggedIn(!!token);
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  const handleProfilePage = () => {
-    navigate('/perfil');
-  };
+  }, [profileRef]);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    closeMenu();
+    setIsProfileOpen(false);
+    logout();
   };
 
   return (
@@ -41,19 +44,42 @@ export function Header() {
             {isLoggedIn ? (
               <>
                 <Link
-                  to='/favoritos'
-                  className='flex items-center gap-2 rounded-full bg-[#457B9D] px-4 py-2 font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  to='/'
+                  className='flex items-center gap-2 rounded-full bg-transparent border border-white/50 px-4 py-2 font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
                 >
                   <Heart className='h-5 w-5' />
                   <span>Favoritos</span>
                 </Link>
-                <button
-                  onClick={handleProfilePage}
-                  title='Sair'
-                  className='rounded-full bg-[#457B9D] p-2 text-[#F1FAEE] transition-colors hover:bg-opacity-90'
-                >
-                  <UserRound className='h-6 w-6' />
-                </button>
+                
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={() => setIsProfileOpen(prev => !prev)}
+                    title='Perfil'
+                    className='rounded-full bg-[#457B9D] p-2 text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  >
+                    <UserRound className='h-6 w-6' />
+                  </button>
+
+                  {isProfileOpen && (
+                    <div className="absolute right-0 top-12 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                      <Link
+                        to="/perfil"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <User className="w-4 h-4" />
+                        Meu Perfil
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sair
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>
@@ -93,15 +119,22 @@ export function Header() {
             {isLoggedIn ? (
               <>
                 <Link
-                  to='/favoritos'
+                  to='/'
                   onClick={closeMenu}
-                  className='w-full rounded-full bg-[#457B9D] px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  className='w-full rounded-full bg-transparent border border-white/50 px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
                 >
                   Favoritos
                 </Link>
-                <button
-                  onClick={handleProfilePage}
+                <Link
+                  to='/perfil'
+                  onClick={closeMenu}
                   className='w-full rounded-full bg-[#457B9D] px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                >
+                  Meu Perfil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className='w-full rounded-full bg-red-600 px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-red-700'
                 >
                   Sair
                 </button>

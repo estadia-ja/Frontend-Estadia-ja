@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userId");
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate("/");
   };
 
   if (isLoading) {
