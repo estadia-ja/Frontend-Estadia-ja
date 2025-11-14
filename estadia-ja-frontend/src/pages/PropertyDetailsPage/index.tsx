@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import api from '../../lib/api';
 import { Star, Heart } from 'lucide-react';
 import { type DateRange } from 'react-day-picker';
 import { type Property } from '../../components/ListingCard';
@@ -105,65 +106,52 @@ export function PropertyDetailPage() {
     throw error;
   };
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!propertyId) return;
+  const fetchDetails = async () => {
+    if (!propertyId) return;
+    setIsLoading(true);
+    setApiError(null);
 
-      setIsLoading(true);
-      setApiError(null);
+    try {
+      const propertyPromise = api.get(`/property/${propertyId}`);
+      const reviewsPromise = api.get(`/property/${propertyId}/valuations`).catch(handleFetchError);
+      const allReservationsPromise = api.get(`/property/${propertyId}/reservations`).catch(handleFetchError);
+      const myReservationsPromise = api.get(`/reserve/my-reservations`).catch(handleFetchError);
 
-      const token = localStorage.getItem('authToken');
-      const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
-
-      try {
-        const propertyPromise = axios.get(`${API_URL}/property/${propertyId}`);
-        const reviewsPromise = axios
-          .get(`${API_URL}/property/${propertyId}/valuations`)
-          .catch(handleFetchError);
-        const allReservationsPromise = axios
-          .get(`${API_URL}/property/${propertyId}/reservations`)
-          .catch(handleFetchError);
-        const myReservationsPromise = token
-          ? axios
-              .get(`${API_URL}/reserve/my-reservations`, authHeaders)
-              .catch(handleFetchError)
-          : Promise.resolve({ data: [] });
-
-        const [
-          propertyResponse,
-          reviewsResponse,
-          allReservationsResponse,
-          myReservationsResponse,
-        ] = await Promise.all([
-          propertyPromise,
-          reviewsPromise,
-          allReservationsPromise,
-          myReservationsPromise,
-        ]);
-
-        setProperty(propertyResponse.data);
-        setReviews(reviewsResponse.data || []);
-
-        const allReservations: Reservation[] =
-          allReservationsResponse.data || [];
-        const myReservations: Reservation[] = myReservationsResponse.data || [];
-
-        const disabledRanges = allReservations.map((res) => ({
-          from: parseISO(res.dateStart),
-          to: parseISO(res.dateEnd),
-        }));
-        setDisabledDates(disabledRanges);
-
-        const foundUserReservation =
-          myReservations.find((res) => res.propertyId === propertyId) || null;
-        setUserReservation(foundUserReservation);
-      } catch (error) {
-        console.error('Erro ao buscar detalhes:', error);
+      const [
+        propertyResponse,
+        reviewsResponse,
+        allReservationsResponse,
+        myReservationsResponse,
+      ] = await Promise.all([
+        propertyPromise,
+        reviewsPromise,
+        allReservationsPromise,
+        myReservationsPromise,
+      ]);
+      setProperty(propertyResponse.data);
+      setReviews(reviewsResponse.data || []);
+      const allReservations: Reservation[] =
+        allReservationsResponse.data || [];
+      const myReservations: Reservation[] = myReservationsResponse.data || [];
+      const disabledRanges = allReservations.map((res) => ({
+        from: parseISO(res.dateStart),
+        to: parseISO(res.dateEnd),
+      }));
+      setDisabledDates(disabledRanges);
+      const foundUserReservation =
+        myReservations.find((res) => res.propertyId === propertyId) || null;
+      setUserReservation(foundUserReservation);
+    } catch (error) {
+      console.error('Erro ao buscar detalhes:', error);
+      if (!axios.isAxiosError(error) || error.response?.status !== 401) {
         setApiError('Não foi possível carregar os dados do imóvel.');
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDetails();
   }, [propertyId, lastUpdated]);
 
@@ -232,11 +220,7 @@ export function PropertyDetailPage() {
         dateEnd: checkOutDateTime.toISOString(),
       };
 
-      const apiUrl = `${API_URL}/property/${propertyId}/reserve`;
-
-      await axios.post(apiUrl, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/property/${propertyId}/reserve`, payload);
 
       showSuccessModal('Reserva confirmada!');
       setIsConfirmModalOpen(false);
@@ -301,9 +285,7 @@ export function PropertyDetailPage() {
         dateEnd: checkOutDateTime.toISOString(),
       };
 
-      await axios.put(`${API_URL}/reserve/${reservationId}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/reserve/${reservationId}`, payload);
 
       showSuccessModal('Reserva atualizada com sucesso!');
       setLastUpdated(Date.now());
@@ -325,19 +307,14 @@ export function PropertyDetailPage() {
   };
 
   const executeCancelReservation = async () => {
-    const token = localStorage.getItem('authToken');
     const reservationId = userReservation?.id;
-
-    if (!token || !reservationId) {
-      showErrorModal('Você não está logado ou a reserva é inválida.');
+    if (!reservationId) {
+      showErrorModal('Não foi possível identificar a reserva.');
       return;
     }
-
     setIsBookingLoading(true);
     try {
-      await axios.delete(`${API_URL}/reserve/${reservationId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/reserve/${reservationId}`);
       showSuccessModal('Reserva cancelada com sucesso!');
       setDateRange(undefined);
       setLastUpdated(Date.now());

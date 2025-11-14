@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import api from '../../lib/api';
 import { type Property } from '../../components/ListingCard';
 import { type ReservationWithProperty } from '../../components/ReservationCard';
 import { ProfileHeader } from '../../components/ProfileHeader';
@@ -69,7 +70,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
 
   const handleFetchError = (error: unknown) => {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
+    if (axios.isAxiosError(error) && (error.response?.status === 404 || error.response?.status === 401)) {
       return { data: [] };
     }
     throw error;
@@ -89,30 +90,18 @@ export function ProfilePage() {
     setIsLoading(true);
     setApiError(null);
 
-    const token = localStorage.getItem('authToken');
     const userId = localStorage.getItem('userId');
-
-    if (!token || !userId) {
+    if (!userId) {
       setIsLoading(false);
-      setApiError('Usuário não autenticado.');
+      showErrorModal('Usuário não autenticado.');
       return;
     }
 
-    const authHeaders = {
-      headers: { Authorization: `Bearer ${token}` },
-    };
-
     try {
-      const userPromise = axios.get(`${API_URL}/user/${userId}`);
-      const propertiesPromise = axios
-        .get(`${API_URL}/property/my-properties`, authHeaders)
-        .catch(handleFetchError);
-      const reservationsPromise = axios
-        .get(`${API_URL}/reserve/my-reservations`, authHeaders)
-        .catch(handleFetchError);
-      const ownerReservationsPromise = axios
-        .get(`${API_URL}/reserve/owner`, authHeaders)
-        .catch(handleFetchError);
+      const userPromise = api.get(`/user/${userId}`);
+      const propertiesPromise = api.get(`/property/my-properties`).catch(handleFetchError);
+      const reservationsPromise = api.get(`/reserve/my-reservations`).catch(handleFetchError);
+      const ownerReservationsPromise = api.get(`/reserve/owner`).catch(handleFetchError);
 
       const [
         userResponse,
@@ -134,7 +123,9 @@ export function ProfilePage() {
       setOwnerReservations(ownerReservationsResponse.data || []);
     } catch (error) {
       console.error('Erro ao buscar dados do perfil:', error);
-      setApiError('Falha ao carregar dados do perfil. Tente novamente.');
+      if (!axios.isAxiosError(error) || error.response?.status !== 401) {
+        showErrorModal('Falha ao carregar dados do perfil. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -159,16 +150,13 @@ export function ProfilePage() {
 
   const executeDeleteProperty = async (id: string) => {
     setIsActionLoading(true);
-    const token = localStorage.getItem('authToken');
     try {
-      await axios.delete(`${API_URL}/property/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMyProperties((prev) => prev.filter((prop) => prop.id !== id));
-      showSuccessModal('Imóvel deletado com sucesso.');
+      await api.delete(`/property/${id}`);
+      setMyProperties(prev => prev.filter(prop => prop.id !== id));
+      showSuccessModal("Imóvel deletado com sucesso.");
     } catch (error) {
-      console.error('Erro ao deletar imóvel:', error);
-      showErrorModal('Falha ao deletar imóvel.');
+      console.error("Erro ao deletar imóvel:", error);
+      showErrorModal("Falha ao deletar imóvel.");
     } finally {
       setIsConfirmModalOpen(false);
       setIsActionLoading(false);
@@ -184,56 +172,31 @@ export function ProfilePage() {
   };
 
   const executeUpdateReservation = async (newDateRange: DateRange) => {
-    const token = localStorage.getItem('authToken');
     const reservationId = reservationToUpdate?.id;
-
-    if (!token || !reservationId || !newDateRange.from || !newDateRange.to) {
-      showErrorModal('Erro: dados da atualização incompletos.');
+    if (!reservationId || !newDateRange.from || !newDateRange.to) {
+      showErrorModal("Erro: dados da atualização incompletos.");
       return;
     }
-
     if (isSameDay(newDateRange.from, newDateRange.to)) {
-      showErrorModal(
-        'A data de checkout deve ser pelo menos um dia depois do check-in.'
-      );
+      showErrorModal("A data de checkout deve ser pelo menos um dia depois do check-in.");
       return;
     }
-
     setIsActionLoading(true);
     try {
       const fromDate = newDateRange.from;
       const toDate = newDateRange.to;
-      const checkInDateTime = new Date(
-        fromDate.getFullYear(),
-        fromDate.getMonth(),
-        fromDate.getDate(),
-        14,
-        0,
-        0
-      );
-      const checkOutDateTime = new Date(
-        toDate.getFullYear(),
-        toDate.getMonth(),
-        toDate.getDate(),
-        11,
-        0,
-        0
-      );
-
+      const checkInDateTime = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), 14, 0, 0);
+      const checkOutDateTime = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 11, 0, 0);
       const payload = {
         dateStart: checkInDateTime.toISOString(),
         dateEnd: checkOutDateTime.toISOString(),
       };
-
-      await axios.put(`${API_URL}/reserve/${reservationId}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      showSuccessModal('Reserva atualizada com sucesso!');
-      fetchData();
+      await api.put(`/reserve/${reservationId}`, payload);
+      showSuccessModal("Reserva atualizada com sucesso!");
+      fetchData(); 
     } catch (error) {
-      console.error('Erro ao atualizar reserva:', error);
-      let errorMessage = 'Falha ao atualizar reserva.';
+      console.error("Erro ao atualizar reserva:", error);
+      let errorMessage = "Falha ao atualizar reserva.";
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -253,16 +216,13 @@ export function ProfilePage() {
 
   const executeCancelReservation = async (id: string) => {
     setIsActionLoading(true);
-    const token = localStorage.getItem('authToken');
     try {
-      await axios.delete(`${API_URL}/reserve/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMyReservations((prev) => prev.filter((res) => res.id !== id));
-      showSuccessModal('Reserva cancelada com sucesso.');
+      await api.delete(`/reserve/${id}`);
+      setMyReservations(prev => prev.filter(res => res.id !== id));
+      showSuccessModal("Reserva cancelada com sucesso.");
     } catch (error) {
-      console.error('Erro ao cancelar reserva:', error);
-      showErrorModal('Falha ao cancelar reserva.');
+      console.error("Erro ao cancelar reserva:", error);
+      showErrorModal("Falha ao cancelar reserva.");
     } finally {
       setIsConfirmModalOpen(false);
       setIsActionLoading(false);
@@ -275,26 +235,20 @@ export function ProfilePage() {
   };
 
   const executePayment = async (paymentMethod: string) => {
-    const token = localStorage.getItem('authToken');
     const reservationId = reservationToPay?.id;
-
-    if (!token || !reservationId) {
-      showErrorModal('Erro: não foi possível identificar a reserva.');
+    if (!reservationId) {
+      showErrorModal("Erro: não foi possível identificar a reserva.");
       return;
     }
-
     setIsActionLoading(true);
     try {
       const payload = { paymentMethod };
-      await axios.post(`${API_URL}/reserve/${reservationId}/payment`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      showSuccessModal('Pagamento efetuado com sucesso!');
-      fetchData();
+      await api.post(`/reserve/${reservationId}/payment`, payload);
+      showSuccessModal("Pagamento efetuado com sucesso!");
+      fetchData(); 
     } catch (error) {
-      console.error('Erro ao processar pagamento:', error);
-      let errorMessage = 'Falha ao processar pagamento.';
+      console.error("Erro ao processar pagamento:", error);
+      let errorMessage = "Falha ao processar pagamento.";
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -305,39 +259,26 @@ export function ProfilePage() {
     }
   };
 
-  const handleOpenRatingModal = (reservation: Reservation) => {
+  const handleOpenPropertyRatingModal = (reservation: Reservation) => {
     setReservationToRate(reservation);
     setIsRatingModalOpen(true);
   };
 
-  const executeCreateRating = async (rating: number, comment: string) => {
-    const token = localStorage.getItem('authToken');
+  const executeCreatePropertyRating = async (rating: number, comment: string) => {
     const reservationId = reservationToRate?.id;
-    if (!token || !reservationId) {
-      showErrorModal('Erro: não foi possível identificar a reserva.');
+    if (!reservationId) {
+      showErrorModal("Erro: não foi possível identificar a reserva.");
       return;
     }
-
     setIsActionLoading(true);
     try {
-      console.log(rating);
-      const payload = {
-        noteProperty: rating,
-        commentProperty: comment,
-      };
-      await axios.post(
-        `${API_URL}/reserve/${reservationId}/property-valuation`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      showSuccessModal('Avaliação enviada com sucesso!');
-      fetchData();
+      const payload = { rating, comment };
+      await api.post(`/reserve/${reservationId}/property-valuation`, payload);
+      showSuccessModal("Avaliação enviada com sucesso!");
+      fetchData(); 
     } catch (error) {
-      console.error('Erro ao enviar avaliação:', error);
-      let errorMessage = 'Falha ao enviar avaliação.';
+      console.error("Erro ao enviar avaliação:", error);
+      let errorMessage = "Falha ao enviar avaliação.";
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -354,29 +295,20 @@ export function ProfilePage() {
   };
 
   const executeCreateClientRating = async (rating: number, comment: string) => {
-    const token = localStorage.getItem('authToken');
     const reservationId = reservationToRate?.id;
-    if (!token || !reservationId) {
-      showErrorModal('Erro: não foi possível identificar a reserva.');
+    if (!reservationId) {
+      showErrorModal("Erro: não foi possível identificar a reserva.");
       return;
     }
-
     setIsActionLoading(true);
     try {
       const payload = { noteClient: rating, commentClient: comment };
-      await axios.post(
-        `${API_URL}/reserve/${reservationId}/client-valuation`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      showSuccessModal('Avaliação do hóspede enviada com sucesso!');
-      fetchData();
+      await api.post(`/reserve/${reservationId}/client-valuation`, payload);
+      showSuccessModal("Avaliação do hóspede enviada com sucesso!");
+      fetchData(); 
     } catch (error) {
-      console.error('Erro ao avaliar hóspede:', error);
-      let errorMessage = 'Falha ao avaliar hóspede.';
+      console.error("Erro ao avaliar hóspede:", error);
+      let errorMessage = "Falha ao avaliar hóspede.";
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -431,7 +363,7 @@ export function ProfilePage() {
             onUpdate={handleUpdateReservation}
             onCancel={handleCancelReservation}
             onPay={handleOpenPayModal}
-            onRate={handleOpenRatingModal}
+            onRate={handleOpenPropertyRatingModal}
             isLoading={isActionLoading}
           />
 
@@ -500,7 +432,7 @@ export function ProfilePage() {
       {isRatingModalOpen && reservationToRate && (
         <RatingModal
           onClose={() => setIsRatingModalOpen(false)}
-          onConfirm={executeCreateRating}
+          onConfirm={executeCreatePropertyRating}
           isLoading={isActionLoading}
         />
       )}
