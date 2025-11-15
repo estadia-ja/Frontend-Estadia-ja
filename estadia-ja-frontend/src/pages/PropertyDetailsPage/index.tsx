@@ -338,7 +338,12 @@ export function PropertyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className='container mx-auto p-8 text-center'>Carregando...</div>
+      <div
+        className='container mx-auto p-8 text-center'
+        data-testid='property-detail-loading'
+      >
+        Carregando...
+      </div>
     );
   }
 
@@ -348,7 +353,10 @@ export function PropertyDetailPage() {
 
   if (!property) {
     return (
-      <div className='container mx-auto p-8 text-center text-red-600'>
+      <div
+        className='container mx-auto p-8 text-center text-red-600'
+        data-testid='property-detail-not-found'
+      >
         Imóvel não encontrado.
       </div>
     );
@@ -362,21 +370,38 @@ export function PropertyDetailPage() {
   return (
     <>
       <Header />
-      <div className='container mx-auto max-w-7xl p-4 md:p-8'>
+      <div
+        className='container mx-auto max-w-7xl p-4 md:p-8'
+        data-testid='property-detail-page-container'
+      >
         <div className='mb-4 flex items-start justify-between'>
           <div>
-            <h1 className='text-3xl font-bold text-[#1D3557]'>{title}</h1>
+            <h1
+              className='text-3xl font-bold text-[#1D3557]'
+              data-testid='property-detail-title'
+            >
+              {title}
+            </h1>
             <div className='mt-2 flex items-center gap-2'>
               <Star className='h-5 w-5 fill-yellow-500 text-yellow-500' />
-              <span className='font-bold'>
+              <span
+                className='font-bold'
+                data-testid='property-detail-rating-avg'
+              >
                 {property.avgRating?.toFixed(1) || 'Novo'}
               </span>
-              <span className='text-gray-600'>
+              <span
+                className='text-gray-600'
+                data-testid='property-detail-review-count'
+              >
                 · {reviews.length} avaliações
               </span>
             </div>
           </div>
-          <button className='rounded-full p-3 hover:bg-gray-100'>
+          <button
+            className='rounded-full p-3 hover:bg-gray-100'
+            data-testid='property-detail-favorite-button'
+          >
             <Heart className='h-6 w-6 text-[#1D3557]' />
           </button>
         </div>

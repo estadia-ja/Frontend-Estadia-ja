@@ -126,16 +126,24 @@ export function NewProperty() {
           <Link
             to='/perfil'
             className='mb-8 flex items-center text-sm text-[#1D3557] hover:underline'
+            data-testid='new-property-back-link'
           >
             <ArrowLeft className='h-5 w-5' />
             <span className='ml-1'>Voltar para o perfil</span>
           </Link>
 
-          <h1 className='mb-8 text-4xl font-bold text-[#1D3557]'>
+          <h1
+            className='mb-8 text-4xl font-bold text-[#1D3557]'
+            data-testid='new-property-title'
+          >
             Cadastre seu imóvel
           </h1>
 
-          <form onSubmit={handleSubmit} className='w-full space-y-6'>
+          <form
+            onSubmit={handleSubmit}
+            className='w-full space-y-6'
+            data-testid='new-property-form'
+          >
             <BasicInfoForm
               type={type}
               setType={setType}
@@ -193,7 +201,10 @@ export function NewProperty() {
             />
 
             {apiError && (
-              <p className='pt-2 text-center text-sm text-red-600'>
+              <p
+                className='pt-2 text-center text-sm text-red-600'
+                data-testid='new-property-api-error'
+              >
                 {apiError}
               </p>
             )}
@@ -202,6 +213,7 @@ export function NewProperty() {
               type='submit'
               className='mt-6 w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white transition-colors hover:bg-opacity-90 disabled:opacity-50'
               disabled={isLoading}
+              data-testid='new-property-submit-button'
             >
               {isLoading ? 'Cadastrando...' : 'Cadastrar'}
               <Upload className='ml-2 inline h-5 w-5' />

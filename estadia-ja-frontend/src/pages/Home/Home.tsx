@@ -127,9 +127,15 @@ export function Home() {
         onOpenGuestsModal={openGuestsModal}
       />
 
-      <main className='container mx-auto p-4 md:p-8'>
+      <main
+        className='container mx-auto p-4 md:p-8'
+        data-testid='home-main-content'
+      >
         <div className='mb-6 flex flex-col items-center justify-between md:flex-row'>
-          <h2 className='mb-4 text-3xl font-bold text-[#1D3557] md:mb-0'>
+          <h2
+            className='mb-4 text-3xl font-bold text-[#1D3557] md:mb-0'
+            data-testid='home-results-title'
+          >
             {destination ? `Resultados para "${destination}"` : 'Destaques'}
           </h2>
 
@@ -143,9 +149,19 @@ export function Home() {
         </div>
 
         {isLoading ? (
-          <p className='text-center text-gray-600'>Carregando imóveis...</p>
+          <p
+            className='text-center text-gray-600'
+            data-testid='home-loading-message'
+          >
+            Carregando imóveis...
+          </p>
         ) : apiError ? (
-          <p className='text-center text-red-600'>{apiError}</p>
+          <p
+            className='text-center text-red-600'
+            data-testid='home-api-error-message'
+          >
+            {apiError}
+          </p>
         ) : listings.length > 0 ? (
           <ListingGrid
             listings={listings}
@@ -153,7 +169,12 @@ export function Home() {
             checkOut={checkOut}
           />
         ) : (
-          <p className='text-center text-gray-600'>Nenhum imóvel encontrado.</p>
+          <p
+            className='text-center text-gray-600'
+            data-testid='home-no-results-message'
+          >
+            Nenhum imóvel encontrado.
+          </p>
         )}
       </main>
 

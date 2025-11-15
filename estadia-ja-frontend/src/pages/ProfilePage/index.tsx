@@ -349,7 +349,10 @@ export function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
+      <div
+        className='flex flex-grow items-center justify-center bg-[#A8DADC]'
+        data-testid='profile-page-loading'
+      >
         <p className='text-lg'>Carregando perfil...</p>
       </div>
     );
@@ -369,7 +372,10 @@ export function ProfilePage() {
 
   if (!user) {
     return (
-      <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
+      <div
+        className='flex flex-grow items-center justify-center bg-[#A8DADC]'
+        data-testid='profile-page-user-error'
+      >
         <p className='text-lg text-red-700'>
           Erro ao carregar dados do usuário.
         </p>
@@ -382,7 +388,10 @@ export function ProfilePage() {
   return (
     <>
       <Header />
-      <div className='flex-grow bg-[#fff] p-4 md:p-8'>
+      <div
+        className='flex-grow bg-[#fff] p-4 md:p-8'
+        data-testid='profile-page-container'
+      >
         <div className='container mx-auto max-w-7xl space-y-10'>
           <ProfileHeader user={user} />
 
@@ -398,7 +407,7 @@ export function ProfilePage() {
           {!isOwner && <BecomeOwnerBlock />}
 
           {isOwner && (
-            <>
+            <div data-testid='profile-owner-section'>
               <AnalyticsBlock />
               <OwnerReservationsBlock
                 reservations={ownerReservations}
@@ -410,7 +419,7 @@ export function ProfilePage() {
                 onEdit={handleEditProperty}
                 onDelete={handleDeleteProperty}
               />
-            </>
+            </div>
           )}
         </div>
       </div>
