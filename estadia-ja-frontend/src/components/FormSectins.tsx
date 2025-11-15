@@ -1,4 +1,3 @@
-
 import { ImageUp } from 'lucide-react';
 import { InputText, InputCheckbox } from './FormInputs';
 

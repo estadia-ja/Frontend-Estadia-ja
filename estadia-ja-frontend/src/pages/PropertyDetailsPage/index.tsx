@@ -42,7 +42,7 @@ export type Review = {
   user: {
     id: string;
     name: string;
-    avatarUrl:string;
+    avatarUrl: string;
   };
 };
 export type Reservation = {
@@ -113,9 +113,15 @@ export function PropertyDetailPage() {
 
     try {
       const propertyPromise = api.get(`/property/${propertyId}`);
-      const reviewsPromise = api.get(`/property/${propertyId}/valuations`).catch(handleFetchError);
-      const allReservationsPromise = api.get(`/property/${propertyId}/reservations`).catch(handleFetchError);
-      const myReservationsPromise = api.get(`/reserve/my-reservations`).catch(handleFetchError);
+      const reviewsPromise = api
+        .get(`/property/${propertyId}/valuations`)
+        .catch(handleFetchError);
+      const allReservationsPromise = api
+        .get(`/property/${propertyId}/reservations`)
+        .catch(handleFetchError);
+      const myReservationsPromise = api
+        .get(`/reserve/my-reservations`)
+        .catch(handleFetchError);
 
       const [
         propertyResponse,
@@ -130,8 +136,7 @@ export function PropertyDetailPage() {
       ]);
       setProperty(propertyResponse.data);
       setReviews(reviewsResponse.data || []);
-      const allReservations: Reservation[] =
-        allReservationsResponse.data || [];
+      const allReservations: Reservation[] = allReservationsResponse.data || [];
       const myReservations: Reservation[] = myReservationsResponse.data || [];
       const disabledRanges = allReservations.map((res) => ({
         from: parseISO(res.dateStart),

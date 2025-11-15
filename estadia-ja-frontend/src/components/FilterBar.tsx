@@ -1,4 +1,3 @@
-
 import { MapPin, Star } from 'lucide-react';
 
 type FilterBarProps = {

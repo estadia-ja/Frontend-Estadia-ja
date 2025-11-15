@@ -1,4 +1,3 @@
-
 import { Star } from 'lucide-react';
 import { type Review } from '../pages/PropertyDetailsPage/index.tsx';
 

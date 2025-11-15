@@ -39,7 +39,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiMessage, setApiMessage] = useState({ type: '', text: '' });
 
-  const { login } = useAuth(); 
+  const { login } = useAuth();
 
   const validatedForm = () => {
     setEmailError('');

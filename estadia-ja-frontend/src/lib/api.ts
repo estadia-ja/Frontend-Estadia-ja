@@ -26,10 +26,10 @@ api.interceptors.response.use(
   (error) => {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {
-        console.error("Erro 401: Token expirado ou inválido. Deslogando...");
+        console.error('Erro 401: Token expirado ou inválido. Deslogando...');
         localStorage.removeItem('authToken');
         localStorage.removeItem('userId');
-        window.location.href = '/login'; 
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

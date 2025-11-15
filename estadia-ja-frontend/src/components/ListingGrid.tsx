@@ -1,4 +1,3 @@
-
 import { ListingCard, type Property } from './ListingCard';
 
 type ListingGridProps = {

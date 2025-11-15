@@ -1,4 +1,3 @@
-
 import { type Review } from '../pages/PropertyDetailsPage/index.tsx';
 import { ReviewCard } from './ReviewCard.tsx';
 

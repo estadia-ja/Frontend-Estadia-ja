@@ -11,13 +11,16 @@ export function Header() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
         setIsProfileOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [profileRef]);
 
@@ -45,15 +48,15 @@ export function Header() {
               <>
                 <Link
                   to='/'
-                  className='flex items-center gap-2 rounded-full bg-transparent border border-white/50 px-4 py-2 font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
+                  className='flex items-center gap-2 rounded-full border border-white/50 bg-transparent px-4 py-2 font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
                 >
                   <Heart className='h-5 w-5' />
                   <span>Favoritos</span>
                 </Link>
-                
-                <div className="relative" ref={profileRef}>
+
+                <div className='relative' ref={profileRef}>
                   <button
-                    onClick={() => setIsProfileOpen(prev => !prev)}
+                    onClick={() => setIsProfileOpen((prev) => !prev)}
                     title='Perfil'
                     className='rounded-full bg-[#457B9D] p-2 text-[#F1FAEE] transition-colors hover:bg-opacity-90'
                   >
@@ -61,20 +64,20 @@ export function Header() {
                   </button>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 top-12 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <div className='absolute right-0 top-12 z-50 w-48 rounded-md bg-white py-1 shadow-lg'>
                       <Link
-                        to="/perfil"
+                        to='/perfil'
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className='flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
                       >
-                        <User className="w-4 h-4" />
+                        <User className='h-4 w-4' />
                         Meu Perfil
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        className='flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100'
                       >
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className='h-4 w-4' />
                         Sair
                       </button>
                     </div>
@@ -121,7 +124,7 @@ export function Header() {
                 <Link
                   to='/'
                   onClick={closeMenu}
-                  className='w-full rounded-full bg-transparent border border-white/50 px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
+                  className='w-full rounded-full border border-white/50 bg-transparent px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
                 >
                   Favoritos
                 </Link>

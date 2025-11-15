@@ -35,7 +35,7 @@ export type User = {
   cpf: string;
   phones: Phone[];
   avatarUrl: string;
-  avgRating:string;
+  avgRating: string;
 };
 
 export type Reservation = ReservationWithProperty;
@@ -70,7 +70,10 @@ export function ProfilePage() {
   const navigate = useNavigate();
 
   const handleFetchError = (error: unknown) => {
-    if (axios.isAxiosError(error) && (error.response?.status === 404 || error.response?.status === 401)) {
+    if (
+      axios.isAxiosError(error) &&
+      (error.response?.status === 404 || error.response?.status === 401)
+    ) {
       return { data: [] };
     }
     throw error;
@@ -99,9 +102,15 @@ export function ProfilePage() {
 
     try {
       const userPromise = api.get(`/user/${userId}`);
-      const propertiesPromise = api.get(`/property/my-properties`).catch(handleFetchError);
-      const reservationsPromise = api.get(`/reserve/my-reservations`).catch(handleFetchError);
-      const ownerReservationsPromise = api.get(`/reserve/owner`).catch(handleFetchError);
+      const propertiesPromise = api
+        .get(`/property/my-properties`)
+        .catch(handleFetchError);
+      const reservationsPromise = api
+        .get(`/reserve/my-reservations`)
+        .catch(handleFetchError);
+      const ownerReservationsPromise = api
+        .get(`/reserve/owner`)
+        .catch(handleFetchError);
 
       const [
         userResponse,
@@ -152,11 +161,11 @@ export function ProfilePage() {
     setIsActionLoading(true);
     try {
       await api.delete(`/property/${id}`);
-      setMyProperties(prev => prev.filter(prop => prop.id !== id));
-      showSuccessModal("Imóvel deletado com sucesso.");
+      setMyProperties((prev) => prev.filter((prop) => prop.id !== id));
+      showSuccessModal('Imóvel deletado com sucesso.');
     } catch (error) {
-      console.error("Erro ao deletar imóvel:", error);
-      showErrorModal("Falha ao deletar imóvel.");
+      console.error('Erro ao deletar imóvel:', error);
+      showErrorModal('Falha ao deletar imóvel.');
     } finally {
       setIsConfirmModalOpen(false);
       setIsActionLoading(false);
@@ -174,29 +183,45 @@ export function ProfilePage() {
   const executeUpdateReservation = async (newDateRange: DateRange) => {
     const reservationId = reservationToUpdate?.id;
     if (!reservationId || !newDateRange.from || !newDateRange.to) {
-      showErrorModal("Erro: dados da atualização incompletos.");
+      showErrorModal('Erro: dados da atualização incompletos.');
       return;
     }
     if (isSameDay(newDateRange.from, newDateRange.to)) {
-      showErrorModal("A data de checkout deve ser pelo menos um dia depois do check-in.");
+      showErrorModal(
+        'A data de checkout deve ser pelo menos um dia depois do check-in.'
+      );
       return;
     }
     setIsActionLoading(true);
     try {
       const fromDate = newDateRange.from;
       const toDate = newDateRange.to;
-      const checkInDateTime = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), 14, 0, 0);
-      const checkOutDateTime = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 11, 0, 0);
+      const checkInDateTime = new Date(
+        fromDate.getFullYear(),
+        fromDate.getMonth(),
+        fromDate.getDate(),
+        14,
+        0,
+        0
+      );
+      const checkOutDateTime = new Date(
+        toDate.getFullYear(),
+        toDate.getMonth(),
+        toDate.getDate(),
+        11,
+        0,
+        0
+      );
       const payload = {
         dateStart: checkInDateTime.toISOString(),
         dateEnd: checkOutDateTime.toISOString(),
       };
       await api.put(`/reserve/${reservationId}`, payload);
-      showSuccessModal("Reserva atualizada com sucesso!");
-      fetchData(); 
+      showSuccessModal('Reserva atualizada com sucesso!');
+      fetchData();
     } catch (error) {
-      console.error("Erro ao atualizar reserva:", error);
-      let errorMessage = "Falha ao atualizar reserva.";
+      console.error('Erro ao atualizar reserva:', error);
+      let errorMessage = 'Falha ao atualizar reserva.';
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -218,11 +243,11 @@ export function ProfilePage() {
     setIsActionLoading(true);
     try {
       await api.delete(`/reserve/${id}`);
-      setMyReservations(prev => prev.filter(res => res.id !== id));
-      showSuccessModal("Reserva cancelada com sucesso.");
+      setMyReservations((prev) => prev.filter((res) => res.id !== id));
+      showSuccessModal('Reserva cancelada com sucesso.');
     } catch (error) {
-      console.error("Erro ao cancelar reserva:", error);
-      showErrorModal("Falha ao cancelar reserva.");
+      console.error('Erro ao cancelar reserva:', error);
+      showErrorModal('Falha ao cancelar reserva.');
     } finally {
       setIsConfirmModalOpen(false);
       setIsActionLoading(false);
@@ -237,18 +262,18 @@ export function ProfilePage() {
   const executePayment = async (paymentMethod: string) => {
     const reservationId = reservationToPay?.id;
     if (!reservationId) {
-      showErrorModal("Erro: não foi possível identificar a reserva.");
+      showErrorModal('Erro: não foi possível identificar a reserva.');
       return;
     }
     setIsActionLoading(true);
     try {
       const payload = { paymentMethod };
       await api.post(`/reserve/${reservationId}/payment`, payload);
-      showSuccessModal("Pagamento efetuado com sucesso!");
-      fetchData(); 
+      showSuccessModal('Pagamento efetuado com sucesso!');
+      fetchData();
     } catch (error) {
-      console.error("Erro ao processar pagamento:", error);
-      let errorMessage = "Falha ao processar pagamento.";
+      console.error('Erro ao processar pagamento:', error);
+      let errorMessage = 'Falha ao processar pagamento.';
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -264,21 +289,24 @@ export function ProfilePage() {
     setIsRatingModalOpen(true);
   };
 
-  const executeCreatePropertyRating = async (rating: number, comment: string) => {
+  const executeCreatePropertyRating = async (
+    rating: number,
+    comment: string
+  ) => {
     const reservationId = reservationToRate?.id;
     if (!reservationId) {
-      showErrorModal("Erro: não foi possível identificar a reserva.");
+      showErrorModal('Erro: não foi possível identificar a reserva.');
       return;
     }
     setIsActionLoading(true);
     try {
       const payload = { rating, comment };
       await api.post(`/reserve/${reservationId}/property-valuation`, payload);
-      showSuccessModal("Avaliação enviada com sucesso!");
-      fetchData(); 
+      showSuccessModal('Avaliação enviada com sucesso!');
+      fetchData();
     } catch (error) {
-      console.error("Erro ao enviar avaliação:", error);
-      let errorMessage = "Falha ao enviar avaliação.";
+      console.error('Erro ao enviar avaliação:', error);
+      let errorMessage = 'Falha ao enviar avaliação.';
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -297,18 +325,18 @@ export function ProfilePage() {
   const executeCreateClientRating = async (rating: number, comment: string) => {
     const reservationId = reservationToRate?.id;
     if (!reservationId) {
-      showErrorModal("Erro: não foi possível identificar a reserva.");
+      showErrorModal('Erro: não foi possível identificar a reserva.');
       return;
     }
     setIsActionLoading(true);
     try {
       const payload = { noteClient: rating, commentClient: comment };
       await api.post(`/reserve/${reservationId}/client-valuation`, payload);
-      showSuccessModal("Avaliação do hóspede enviada com sucesso!");
-      fetchData(); 
+      showSuccessModal('Avaliação do hóspede enviada com sucesso!');
+      fetchData();
     } catch (error) {
-      console.error("Erro ao avaliar hóspede:", error);
-      let errorMessage = "Falha ao avaliar hóspede.";
+      console.error('Erro ao avaliar hóspede:', error);
+      let errorMessage = 'Falha ao avaliar hóspede.';
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
