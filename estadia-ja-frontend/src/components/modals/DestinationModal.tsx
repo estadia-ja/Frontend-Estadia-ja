@@ -1,4 +1,3 @@
-// src/components/modals/DestinationModal.tsx (Atualizado)
 import { useState } from 'react';
 import { X, MapPin, Search } from 'lucide-react';
 
@@ -16,13 +15,22 @@ export function DestinationModal(props: DestinationModalProps) {
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
+    <div
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
+      data-testid='destination-modal-backdrop'
+    >
       <div className='w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl'>
         <div className='mb-4 flex items-center justify-between'>
-          <h2 className='text-xl font-bold text-[#1D3557]'>Para onde?</h2>
+          <h2
+            className='text-xl font-bold text-[#1D3557]'
+            data-testid='destination-modal-title'
+          >
+            Para onde?
+          </h2>
           <button
             onClick={props.onClose}
             className='rounded-full p-2 hover:bg-gray-200'
+            data-testid='destination-modal-close-button'
           >
             <X className='h-6 w-6 text-gray-700' />
           </button>
@@ -41,12 +49,14 @@ export function DestinationModal(props: DestinationModalProps) {
             placeholder='Buscar por estado (ex: SP, RJ, BA)'
             className='w-full rounded-full border-2 border-gray-300 py-3 pl-12 pr-6 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all focus:ring-2 focus:ring-[#1D3557]'
             autoFocus
+            data-testid='destination-modal-input'
           />
         </div>
 
         <button
           onClick={handleSelect}
           className='flex w-full items-center justify-center gap-2 rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white transition-colors hover:bg-opacity-90'
+          data-testid='destination-modal-search-button'
         >
           <Search className='h-5 w-5' />
           Buscar

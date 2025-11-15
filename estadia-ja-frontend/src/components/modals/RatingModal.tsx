@@ -22,16 +22,23 @@ export function RatingModal({
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
+    <div
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
+      data-testid='rating-modal-backdrop'
+    >
       <div className='flex w-full max-w-lg flex-col rounded-2xl bg-white p-6 shadow-xl'>
         <div className='mb-4 flex items-center justify-between'>
-          <h2 className='text-xl font-bold text-[#1D3557]'>
+          <h2
+            className='text-xl font-bold text-[#1D3557]'
+            data-testid='rating-modal-title'
+          >
             Avalie sua Estadia
           </h2>
           <button
             onClick={onClose}
             className='rounded-full p-2 hover:bg-gray-200'
             disabled={isLoading}
+            data-testid='rating-modal-close-button'
           >
             <X className='h-6 w-6 text-gray-700' />
           </button>
@@ -50,6 +57,7 @@ export function RatingModal({
                 onClick={() => setRating(starValue)}
                 onMouseEnter={() => setHoverRating(starValue)}
                 onMouseLeave={() => setHoverRating(0)}
+                data-testid={`rating-modal-star-${starValue}`}
               >
                 <Star
                   className={`h-10 w-10 transition-colors ${
@@ -68,12 +76,14 @@ export function RatingModal({
           onChange={(e) => setComment(e.target.value)}
           placeholder='Escreva seu comentário (opcional)...'
           className='h-32 w-full rounded-lg bg-gray-100 p-4 text-gray-800 outline-none transition-all focus:ring-2 focus:ring-[#1D3557]'
+          data-testid='rating-modal-comment-textarea'
         />
 
         <button
           onClick={handleConfirm}
           disabled={isLoading || rating === 0}
           className='mt-6 w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white hover:bg-opacity-90 disabled:opacity-50'
+          data-testid='rating-modal-submit-button'
         >
           {isLoading ? 'Enviando...' : 'Enviar Avaliação'}
         </button>

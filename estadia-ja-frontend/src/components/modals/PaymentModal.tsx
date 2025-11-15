@@ -36,16 +36,23 @@ export function PaymentModal({
   const totalPrice = calculateTotal(reservation);
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
+    <div
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
+      data-testid='payment-modal-backdrop'
+    >
       <div className='flex w-full max-w-md flex-col rounded-2xl bg-white p-6 shadow-xl'>
         <div className='mb-4 flex items-center justify-between'>
-          <h2 className='text-xl font-bold text-[#1D3557]'>
+          <h2
+            className='text-xl font-bold text-[#1D3557]'
+            data-testid='payment-modal-title'
+          >
             Efetuar Pagamento
           </h2>
           <button
             onClick={onClose}
             className='rounded-full p-2 hover:bg-gray-200'
             disabled={isLoading}
+            data-testid='payment-modal-close-button'
           >
             <X className='h-6 w-6 text-gray-700' />
           </button>
@@ -53,7 +60,12 @@ export function PaymentModal({
 
         <div className='mb-6 text-center'>
           <p className='text-lg text-gray-700'>Valor Total da Reserva:</p>
-          <p className='text-4xl font-bold text-[#1D3557]'>R$ {totalPrice}</p>
+          <p
+            className='text-4xl font-bold text-[#1D3557]'
+            data-testid='payment-modal-total-price'
+          >
+            R$ {totalPrice}
+          </p>
         </div>
 
         <div className='mb-6 space-y-3'>
@@ -71,6 +83,7 @@ export function PaymentModal({
               checked={paymentMethod === 'CREDIT_CARD'}
               onChange={(e) => setPaymentMethod(e.target.value)}
               className='h-5 w-5 text-[#1D3557] focus:ring-[#1D3557]'
+              data-testid='payment-modal-radio-credit-card'
             />
             <CreditCard className='mx-3 h-6 w-6 text-gray-700' />
             <span className='font-medium text-gray-800'>Cartão de Crédito</span>
@@ -86,6 +99,7 @@ export function PaymentModal({
               checked={paymentMethod === 'PIX'}
               onChange={(e) => setPaymentMethod(e.target.value)}
               className='h-5 w-5 text-[#1D3557] focus:ring-[#1D3557]'
+              data-testid='payment-modal-radio-pix'
             />
             <QrCode className='mx-3 h-6 w-6 text-gray-700' />
             <span className='font-medium text-gray-800'>PIX</span>
@@ -101,6 +115,7 @@ export function PaymentModal({
               checked={paymentMethod === 'BOLETO'}
               onChange={(e) => setPaymentMethod(e.target.value)}
               className='h-5 w-5 text-[#1D3557] focus:ring-[#1D3557]'
+              data-testid='payment-modal-radio-boleto'
             />
             <Banknote className='mx-3 h-6 w-6 text-gray-700' />
             <span className='font-medium text-gray-800'>Boleto</span>
@@ -111,6 +126,7 @@ export function PaymentModal({
           onClick={() => onConfirm(paymentMethod)}
           disabled={isLoading}
           className='mt-2 w-full rounded-full bg-green-600 py-3 text-lg font-semibold text-white hover:bg-green-700 disabled:opacity-50'
+          data-testid='payment-modal-confirm-button'
         >
           {isLoading ? 'Processando...' : `Pagar R$ ${totalPrice}`}
         </button>
