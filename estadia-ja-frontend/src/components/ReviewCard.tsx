@@ -6,8 +6,13 @@ type ReviewCardProps = {
 };
 
 export function ReviewCard({ review }: ReviewCardProps) {
+  const testIdBase = `review-card-${review.id}`;
+
   return (
-    <div className='rounded-lg bg-[#fff] p-6 shadow-md'>
+    <div
+      className='rounded-lg bg-[#fff] p-6 shadow-md'
+      data-testid={testIdBase}
+    >
       <div className='mb-3 flex items-center gap-3'>
         <img
           src={
@@ -16,15 +21,25 @@ export function ReviewCard({ review }: ReviewCardProps) {
           }
           alt={review.user?.name}
           className='h-12 w-12 rounded-full'
+          data-testid={`${testIdBase}-user-avatar`}
         />
         <div>
-          <h4 className='font-bold text-[#1D3557]'>
+          <h4
+            className='font-bold text-[#1D3557]'
+            data-testid={`${testIdBase}-user-name`}
+          >
             {review.user?.name || 'Usuário'}
           </h4>
         </div>
       </div>
-      <p className='mb-3 text-gray-800'>"{review.comment}"</p>
-      <div className='flex'>
+      <p className='mb-3 text-gray-800' data-testid={`${testIdBase}-comment`}>
+        "{review.comment}"
+      </p>
+      <div
+        className='flex'
+        data-testid={`${testIdBase}-rating-stars`}
+        aria-label={`Avaliação: ${review.rating} de 5 estrelas`}
+      >
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}

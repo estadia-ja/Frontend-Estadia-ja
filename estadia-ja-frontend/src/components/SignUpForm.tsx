@@ -143,12 +143,18 @@ export function SignUpForm() {
           <Link
             to='/'
             className='mb-8 flex items-center text-sm text-[#1D3557] hover:underline'
+            data-testid='signup-back-link'
           >
             <ArrowLeft className='h-5 w-5' />
             <span className='ml-1'>Voltar para o site</span>
           </Link>
 
-          <h1 className='mb-8 text-4xl font-bold text-[#1D3557]'>Bem-vindo!</h1>
+          <h1
+            className='mb-8 text-4xl font-bold text-[#1D3557]'
+            data-testid='signup-title'
+          >
+            Bem-vindo!
+          </h1>
 
           <form onSubmit={handleSubmit} className='w-full space-y-2'>
             <div>
@@ -170,9 +176,15 @@ export function SignUpForm() {
                 className={`w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all ${getErrorClasses(
                   !!nameError
                 )}`}
+                data-testid='signup-name-input'
               />
               {nameError && (
-                <p className='ml-4 mt-1 text-xs text-red-600'>{nameError}</p>
+                <p
+                  className='ml-4 mt-1 text-xs text-red-600'
+                  data-testid='signup-name-error'
+                >
+                  {nameError}
+                </p>
               )}
             </div>
 
@@ -195,9 +207,15 @@ export function SignUpForm() {
                 className={`w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all ${getErrorClasses(
                   !!emailError
                 )}`}
+                data-testid='signup-email-input'
               />
               {emailError && (
-                <p className='ml-4 mt-1 text-xs text-red-600'>{emailError}</p>
+                <p
+                  className='ml-4 mt-1 text-xs text-red-600'
+                  data-testid='signup-email-error'
+                >
+                  {emailError}
+                </p>
               )}
             </div>
 
@@ -217,9 +235,15 @@ export function SignUpForm() {
                 className={`w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all ${getErrorClasses(
                   !!cpfError
                 )}`}
+                data-testid='signup-cpf-input'
               />
               {cpfError && (
-                <p className='ml-4 mt-1 text-xs text-red-600'>{cpfError}</p>
+                <p
+                  className='ml-4 mt-1 text-xs text-red-600'
+                  data-testid='signup-cpf-error'
+                >
+                  {cpfError}
+                </p>
               )}
             </div>
 
@@ -239,9 +263,15 @@ export function SignUpForm() {
                 className={`w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all ${getErrorClasses(
                   !!phoneError
                 )}`}
+                data-testid='signup-phone-input'
               />
               {phoneError && (
-                <p className='ml-4 mt-1 text-xs text-red-600'>{phoneError}</p>
+                <p
+                  className='ml-4 mt-1 text-xs text-red-600'
+                  data-testid='signup-phone-error'
+                >
+                  {phoneError}
+                </p>
               )}
             </div>
 
@@ -264,9 +294,13 @@ export function SignUpForm() {
                 className={`w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all ${getErrorClasses(
                   !!passwordError
                 )}`}
+                data-testid='signup-password-input'
               />
               {passwordError && (
-                <p className='ml-4 mt-1 text-xs text-red-600'>
+                <p
+                  className='ml-4 mt-1 text-xs text-red-600'
+                  data-testid='signup-password-error'
+                >
                   {passwordError}
                 </p>
               )}
@@ -279,6 +313,7 @@ export function SignUpForm() {
                     ? 'text-green-600'
                     : 'text-red-600'
                 }`}
+                data-testid='signup-api-message'
               >
                 {apiMessage.text}
               </p>
@@ -288,6 +323,7 @@ export function SignUpForm() {
               type='submit'
               className='mt-6 w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white transition-colors hover:bg-opacity-90 disabled:opacity-50'
               disabled={isLoading}
+              data-testid='signup-submit-button'
             >
               {isLoading ? 'Cadastrando...' : 'Cadastrar'}
             </button>

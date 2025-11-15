@@ -66,19 +66,30 @@ export function ListingCard({
     onDelete?.(property.id);
   };
 
+  const testIdBase = `listing-card-${property.id}`;
+
   return (
-    <div className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'>
-      <Link to={toUrl} className='block transition-opacity hover:opacity-90'>
+    <div
+      className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'
+      data-testid={testIdBase}
+    >
+      <Link
+        to={toUrl}
+        className='block transition-opacity hover:opacity-90'
+        data-testid={`${testIdBase}-link`}
+      >
         <div className='relative'>
           <img
             src={imageUrl}
             alt={title}
             className='h-48 w-full object-cover'
+            data-testid={`${testIdBase}-image`}
           />
           <button
             onClick={handleFavoriteClick}
             className='absolute right-3 top-3 rounded-full bg-white/80 p-2 hover:bg-white'
             aria-label='Adicionar aos favoritos'
+            data-testid={`${testIdBase}-favorite-button`}
           >
             <Heart
               className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-[#1D3557]'}`}
@@ -90,22 +101,36 @@ export function ListingCard({
           <h3
             className='truncate text-lg font-bold text-[#1D3557]'
             title={title}
+            data-testid={`${testIdBase}-title`}
           >
             {title}
           </h3>
 
-          <p className='mt-1 text-sm text-gray-700'>{formattedPrice} / noite</p>
+          <p
+            className='mt-1 text-sm text-gray-700'
+            data-testid={`${testIdBase}-price`}
+          >
+            {formattedPrice} / noite
+          </p>
 
           <div className='mt-2 flex items-center'>
             {property.avgRating ? (
               <>
                 <Star className='h-4 w-4 fill-yellow-500 text-yellow-500' />
-                <span className='ml-1 text-sm font-medium text-gray-700'>
+                <span
+                  className='ml-1 text-sm font-medium text-gray-700'
+                  data-testid={`${testIdBase}-rating-value`}
+                >
                   {property.avgRating.toFixed(1)}
                 </span>
               </>
             ) : (
-              <span className='text-sm text-gray-500'>Novo</span>
+              <span
+                className='text-sm text-gray-500'
+                data-testid={`${testIdBase}-rating-new`}
+              >
+                Novo
+              </span>
             )}
           </div>
         </div>
@@ -116,6 +141,7 @@ export function ListingCard({
           <button
             onClick={handleEdit}
             className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50'
+            data-testid={`${testIdBase}-edit-button`}
           >
             <Edit className='h-4 w-4' />
             Editar
@@ -123,6 +149,7 @@ export function ListingCard({
           <button
             onClick={handleDelete}
             className='flex flex-1 items-center justify-center gap-2 border-l p-3 text-red-600 hover:bg-red-50'
+            data-testid={`${testIdBase}-delete-button`}
           >
             <Trash2 className='h-4 w-4' />
             Deletar

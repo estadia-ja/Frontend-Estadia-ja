@@ -37,7 +37,12 @@ export function Header() {
   return (
     <header className='relative sticky top-0 z-50 w-full bg-[#1D3557] p-4 text-white shadow-md'>
       <nav className='container mx-auto flex items-center justify-between px-4'>
-        <Link to='/' className='flex items-center gap-2' onClick={closeMenu}>
+        <Link
+          to='/'
+          className='flex items-center gap-2'
+          onClick={closeMenu}
+          data-testid='header-home-link'
+        >
           <Home className='h-7 w-7 text-[#F1FAEE]' />
           <span className='text-2xl font-bold text-[#F1FAEE]'>Estadia Já</span>
         </Link>
@@ -49,6 +54,7 @@ export function Header() {
                 <Link
                   to='/'
                   className='flex items-center gap-2 rounded-full border border-white/50 bg-transparent px-4 py-2 font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
+                  data-testid='header-favorites-link-desktop'
                 >
                   <Heart className='h-5 w-5' />
                   <span>Favoritos</span>
@@ -59,16 +65,21 @@ export function Header() {
                     onClick={() => setIsProfileOpen((prev) => !prev)}
                     title='Perfil'
                     className='rounded-full bg-[#457B9D] p-2 text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                    data-testid='header-profile-button-desktop'
                   >
                     <UserRound className='h-6 w-6' />
                   </button>
 
                   {isProfileOpen && (
-                    <div className='absolute right-0 top-12 z-50 w-48 rounded-md bg-white py-1 shadow-lg'>
+                    <div
+                      className='absolute right-0 top-12 z-50 w-48 rounded-md bg-white py-1 shadow-lg'
+                      data-testid='header-profile-dropdown'
+                    >
                       <Link
                         to='/perfil'
                         onClick={() => setIsProfileOpen(false)}
                         className='flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+                        data-testid='header-profile-dropdown-my-profile-link'
                       >
                         <User className='h-4 w-4' />
                         Meu Perfil
@@ -76,6 +87,7 @@ export function Header() {
                       <button
                         onClick={handleLogout}
                         className='flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100'
+                        data-testid='header-profile-dropdown-logout-button'
                       >
                         <LogOut className='h-4 w-4' />
                         Sair
@@ -89,12 +101,14 @@ export function Header() {
                 <Link
                   to='/cadastro'
                   className='rounded-full bg-[#457B9D] px-4 py-2 font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  data-testid='header-signup-link-desktop'
                 >
                   Cadastro
                 </Link>
                 <Link
                   to='/login'
                   className='rounded-full bg-[#457B9D] px-4 py-2 font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  data-testid='header-login-link-desktop'
                 >
                   Login
                 </Link>
@@ -106,6 +120,7 @@ export function Header() {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className='rounded-lg p-2 transition-colors hover:bg-[#457B9D] md:hidden'
             aria-label='Abrir menu'
+            data-testid='header-mobile-menu-toggle-button'
           >
             {isMenuOpen ? (
               <X className='h-6 w-6' />
@@ -117,7 +132,10 @@ export function Header() {
       </nav>
 
       {isMenuOpen && (
-        <div className='absolute left-0 right-0 top-full bg-[#1D3557] p-6 shadow-lg md:hidden'>
+        <div
+          className='absolute left-0 right-0 top-full bg-[#1D3557] p-6 shadow-lg md:hidden'
+          data-testid='header-mobile-menu'
+        >
           <div className='container mx-auto flex flex-col items-center gap-4'>
             {isLoggedIn ? (
               <>
@@ -125,6 +143,7 @@ export function Header() {
                   to='/'
                   onClick={closeMenu}
                   className='w-full rounded-full border border-white/50 bg-transparent px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-white/10'
+                  data-testid='header-favorites-link-mobile'
                 >
                   Favoritos
                 </Link>
@@ -132,12 +151,14 @@ export function Header() {
                   to='/perfil'
                   onClick={closeMenu}
                   className='w-full rounded-full bg-[#457B9D] px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  data-testid='header-my-profile-link-mobile'
                 >
                   Meu Perfil
                 </Link>
                 <button
                   onClick={handleLogout}
                   className='w-full rounded-full bg-red-600 px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-red-700'
+                  data-testid='header-logout-button-mobile'
                 >
                   Sair
                 </button>
@@ -148,6 +169,7 @@ export function Header() {
                   to='/cadastro'
                   onClick={closeMenu}
                   className='w-full rounded-full bg-[#457B9D] px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  data-testid='header-signup-link-mobile'
                 >
                   Cadastro
                 </Link>
@@ -155,6 +177,7 @@ export function Header() {
                   to='/login'
                   onClick={closeMenu}
                   className='w-full rounded-full bg-[#457B9D] px-4 py-3 text-center font-semibold text-[#F1FAEE] transition-colors hover:bg-opacity-90'
+                  data-testid='header-login-link-mobile'
                 >
                   Login
                 </Link>

@@ -1,5 +1,3 @@
-// src/components/SearchBar/index.tsx (Atualizado)
-
 import { Search } from 'lucide-react';
 
 type SearchBarProps = {
@@ -18,15 +16,20 @@ export function SearchBar(props: SearchBarProps) {
     <form
       onSubmit={props.onSearchSubmit}
       className='container mx-auto w-full max-w-4xl p-4'
+      data-testid='searchbar-form'
     >
       <div className='flex h-[72px] w-full items-center overflow-hidden rounded-full shadow-lg'>
         <button
           type='button'
           onClick={props.onOpenDestinationModal}
           className='flex h-full flex-1 flex-col justify-center bg-[#457B9D] pl-6 text-left text-white transition-colors hover:bg-opacity-90'
+          data-testid='searchbar-destination-button'
         >
           <span className='text-xs font-bold uppercase'>Onde</span>
-          <span className='truncate text-sm'>
+          <span
+            className='truncate text-sm'
+            data-testid='searchbar-destination-value'
+          >
             {props.destination || 'Estado (ex: SP, RJ)'}
           </span>
         </button>
@@ -35,9 +38,10 @@ export function SearchBar(props: SearchBarProps) {
           type='button'
           onClick={props.onOpenCalendarModal}
           className='flex h-full flex-1 flex-col justify-center bg-[#1D3557] pl-6 text-left text-white transition-colors hover:bg-opacity-80'
+          data-testid='searchbar-checkin-button'
         >
           <span className='text-xs font-bold uppercase'>Check-in</span>
-          <span className='text-sm'>
+          <span className='text-sm' data-testid='searchbar-checkin-value'>
             {props.checkIn || 'Insira data de chegada'}
           </span>
         </button>
@@ -46,9 +50,10 @@ export function SearchBar(props: SearchBarProps) {
           type='button'
           onClick={props.onOpenCalendarModal}
           className='flex h-full flex-1 flex-col justify-center bg-[#457B9D] pl-6 text-left text-white transition-colors hover:bg-opacity-90'
+          data-testid='searchbar-checkout-button'
         >
           <span className='text-xs font-bold uppercase'>Checkout</span>
-          <span className='text-sm'>
+          <span className='text-sm' data-testid='searchbar-checkout-value'>
             {props.checkOut || 'Insira data de saída'}
           </span>
         </button>
@@ -58,9 +63,10 @@ export function SearchBar(props: SearchBarProps) {
             type='button'
             onClick={props.onOpenGuestsModal}
             className='flex h-full flex-1 flex-col justify-center text-left'
+            data-testid='searchbar-guests-button'
           >
             <span className='text-xs font-bold uppercase'>Quem</span>
-            <span className='text-sm'>
+            <span className='text-sm' data-testid='searchbar-guests-value'>
               {props.guests}{' '}
               {parseInt(props.guests) > 1 ? 'hóspedes' : 'hóspede'}
             </span>
@@ -72,6 +78,7 @@ export function SearchBar(props: SearchBarProps) {
             type='submit'
             className='mr-2 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#457B9D] transition-colors hover:bg-opacity-90'
             aria-label='Buscar'
+            data-testid='searchbar-submit-button'
           >
             <Search className='h-6 w-6 text-white' />
           </button>

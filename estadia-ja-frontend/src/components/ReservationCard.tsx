@@ -77,23 +77,38 @@ export function ReservationCard({
   const showClientRatedButton =
     onRateClient && isCheckOutPast && reservation.clientValuation;
 
+  const testIdBase = `reservation-card-${reservation.id}`;
+
   return (
-    <div className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'>
+    <div
+      className='flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-lg'
+      data-testid={testIdBase}
+    >
       <Link
         to={`/property/${reservation.property.id}`}
         className='block transition-opacity hover:opacity-90'
+        data-testid={`${testIdBase}-link`}
       >
-        <img src={imageUrl} alt={title} className='h-48 w-full object-cover' />
+        <img
+          src={imageUrl}
+          alt={title}
+          className='h-48 w-full object-cover'
+          data-testid={`${testIdBase}-image`}
+        />
         <div className='p-4'>
           <h3
             className='truncate text-lg font-bold text-[#1D3557]'
             title={title}
+            data-testid={`${testIdBase}-title`}
           >
             {title}
           </h3>
           <div className='mt-2 flex items-center gap-2 text-gray-700'>
             <Calendar className='h-4 w-4' />
-            <span className='text-sm font-medium'>
+            <span
+              className='text-sm font-medium'
+              data-testid={`${testIdBase}-dates`}
+            >
               {formatDate(reservation.dateStart)} -{' '}
               {formatDate(reservation.dateEnd)}
             </span>
@@ -104,6 +119,7 @@ export function ReservationCard({
                 ? 'bg-green-100 text-green-800'
                 : 'bg-yellow-100 text-yellow-800'
             }`}
+            data-testid={`${testIdBase}-status`}
           >
             {reservation.status}
           </span>
@@ -117,6 +133,7 @@ export function ReservationCard({
               onClick={() => onUpdate!(reservation.id)}
               disabled={isLoading}
               className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50 disabled:opacity-50'
+              data-testid={`${testIdBase}-update-button`}
             >
               <Edit className='h-4 w-4' />
               Atualizar
@@ -125,6 +142,7 @@ export function ReservationCard({
               onClick={() => onCancel!(reservation.id)}
               disabled={isLoading}
               className='flex flex-1 items-center justify-center gap-2 border-l p-3 text-red-600 hover:bg-red-50 disabled:opacity-50'
+              data-testid={`${testIdBase}-cancel-button`}
             >
               <Trash2 className='h-4 w-4' />
               {isLoading ? '...' : 'Cancelar'}
@@ -137,6 +155,7 @@ export function ReservationCard({
             onClick={() => onPay!(reservation)}
             disabled={isLoading}
             className='flex flex-1 items-center justify-center gap-2 p-3 text-green-600 hover:bg-green-50 disabled:opacity-50'
+            data-testid={`${testIdBase}-pay-button`}
           >
             <DollarSign className='h-4 w-4' />
             Pagar Reserva
@@ -148,6 +167,7 @@ export function ReservationCard({
             onClick={() => onRate!(reservation)}
             disabled={isLoading}
             className='flex flex-1 items-center justify-center gap-2 p-3 text-yellow-600 hover:bg-yellow-50 disabled:opacity-50'
+            data-testid={`${testIdBase}-rate-property-button`}
           >
             <Star className='h-4 w-4' />
             Avaliar Estadia
@@ -155,7 +175,10 @@ export function ReservationCard({
         )}
 
         {showPropertyRatedButton && (
-          <div className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'>
+          <div
+            className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'
+            data-testid={`${testIdBase}-property-rated-message`}
+          >
             <CheckCircle className='h-4 w-4 text-green-500' />
             <span>Avaliado</span>
           </div>
@@ -166,6 +189,7 @@ export function ReservationCard({
             onClick={() => onRateClient!(reservation)}
             disabled={isLoading}
             className='flex flex-1 items-center justify-center gap-2 p-3 text-blue-600 hover:bg-blue-50 disabled:opacity-50'
+            data-testid={`${testIdBase}-rate-client-button`}
           >
             <UserCheck className='h-4 w-4' />
             Avaliar Hóspede
@@ -173,7 +197,10 @@ export function ReservationCard({
         )}
 
         {showClientRatedButton && (
-          <div className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'>
+          <div
+            className='flex flex-1 items-center justify-center gap-2 p-3 text-gray-500'
+            data-testid={`${testIdBase}-client-rated-message`}
+          >
             <CheckCircle className='h-4 w-4 text-green-500' />
             <span>Hóspede Avaliado</span>
           </div>

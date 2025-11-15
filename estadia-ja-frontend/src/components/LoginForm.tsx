@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Home, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const GoogleIcon = () => (
@@ -115,12 +115,18 @@ export function LoginForm() {
           <Link
             to='/'
             className='mb-8 flex items-center text-sm text-[#1D3557] hover:underline'
+            data-testid='login-back-link'
           >
             <ArrowLeft className='h-5 w-5' />
             <span className='ml-1'>Voltar para o site</span>
           </Link>
 
-          <h1 className='mb-8 text-4xl font-bold text-[#1D3557]'>Bem-vindo!</h1>
+          <h1
+            className='mb-8 text-4xl font-bold text-[#1D3557]'
+            data-testid='login-title'
+          >
+            Bem-vindo!
+          </h1>
 
           <form onSubmit={handleSubmit} className='w-full space-y-4'>
             <div>
@@ -142,9 +148,15 @@ export function LoginForm() {
                 className={`w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all ${getErrorClasses(
                   !!emailError
                 )}`}
+                data-testid='login-email-input'
               />
               {emailError && (
-                <p className='ml-4 mt-1 text-xs text-red-600'>{emailError}</p>
+                <p
+                  className='ml-4 mt-1 text-xs text-red-600'
+                  data-testid='login-email-error'
+                >
+                  {emailError}
+                </p>
               )}
             </div>
 
@@ -167,9 +179,13 @@ export function LoginForm() {
                 className={`w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all ${getErrorClasses(
                   !!passwordError
                 )}`}
+                data-testid='login-password-input'
               />
               {passwordError && (
-                <p className='ml-4 mt-1 text-xs text-red-600'>
+                <p
+                  className='ml-4 mt-1 text-xs text-red-600'
+                  data-testid='login-password-error'
+                >
                   {passwordError}
                 </p>
               )}
@@ -182,6 +198,7 @@ export function LoginForm() {
                     ? 'text-green-600'
                     : 'text-red-600'
                 }`}
+                data-testid='login-api-message'
               >
                 {apiMessage.text}
               </p>
@@ -191,6 +208,7 @@ export function LoginForm() {
               type='submit'
               className='mt-6 w-full rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white transition-colors hover:bg-opacity-90 disabled:opacity-50'
               disabled={isLoading}
+              data-testid='login-submit-button'
             >
               {isLoading ? 'Entrando...' : 'Login'}
             </button>
@@ -200,7 +218,11 @@ export function LoginForm() {
             <a href='#' className='hover:underline'>
               {/* Esqueci minha senha */}
             </a>
-            <Link to='/cadastro' className='hover:underline'>
+            <Link
+              to='/cadastro'
+              className='hover:underline'
+              data-testid='login-create-account-link'
+            >
               Criar conta
             </Link>
           </div>
@@ -209,6 +231,7 @@ export function LoginForm() {
             type='button'
             className='mt-6 flex w-full cursor-not-allowed items-center justify-center rounded-full bg-[#1D3557] py-3 text-lg font-semibold text-white opacity-50 transition-colors'
             disabled
+            data-testid='login-google-button'
           >
             <GoogleIcon />
             Login com o google

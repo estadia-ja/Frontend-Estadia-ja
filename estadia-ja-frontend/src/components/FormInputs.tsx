@@ -15,6 +15,8 @@ export function InputText({
   required = false,
   maxLength,
 }: InputTextProps) {
+  const testId = `form-input-${label.toLowerCase().replace(/\s+/g, '-')}`;
+
   return (
     <div>
       <label
@@ -31,6 +33,7 @@ export function InputText({
         required={required}
         maxLength={maxLength}
         className='w-full rounded-full bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all focus:ring-2 focus:ring-[#1D3557]'
+        data-testid={testId}
       />
     </div>
   );
@@ -47,10 +50,13 @@ export function InputCheckbox({
   checked,
   onChange,
 }: InputCheckboxProps) {
+  const testId = `form-checkbox-${label.toLowerCase().replace(/\s+/g, '-')}`;
+
   return (
     <label
       htmlFor={label}
       className='flex items-center justify-start gap-2 rounded-full bg-[#A8DADC] px-6 py-3 font-medium text-[#1D3557]'
+      data-testid={`${testId}-label`}
     >
       <input
         id={label}
@@ -58,6 +64,7 @@ export function InputCheckbox({
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         className='h-5 w-5 rounded text-[#1D3557] focus:ring-[#1D3557]'
+        data-testid={testId}
       />
       {label}
     </label>

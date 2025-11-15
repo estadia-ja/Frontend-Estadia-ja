@@ -9,7 +9,10 @@ type FormSectionProps = {
 function FormSection({ title, children }: FormSectionProps) {
   return (
     <div className='space-y-4'>
-      <h2 className='border-b pb-2 text-xl font-semibold text-[#1D3557]'>
+      <h2
+        className='border-b pb-2 text-xl font-semibold text-[#1D3557]'
+        data-testid='form-section-title'
+      >
         {title}
       </h2>
       {children}
@@ -225,6 +228,7 @@ export function DescriptionForm({
         placeholder='Descreva seu imóvel...'
         className='h-32 w-full rounded-2xl bg-[#A8DADC] px-6 py-3 text-[#1D3557] placeholder-[#1D3557] placeholder-opacity-70 outline-none transition-all focus:ring-2 focus:ring-[#1D3557]'
         required
+        data-testid='form-textarea-description'
       />
     </div>
   );
@@ -247,6 +251,7 @@ export function ImageUploadForm({
       <label
         htmlFor='images'
         className='flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#1D3557] bg-[#A8DADC] transition-colors hover:bg-opacity-80'
+        data-testid='form-image-upload-label'
       >
         <ImageUp className='h-10 w-10 text-[#1D3557]' />
         <span className='font-medium text-[#1D3557]'>
@@ -260,14 +265,19 @@ export function ImageUploadForm({
         accept='image/*'
         onChange={onImageChange}
         className='sr-only'
+        data-testid='form-image-upload-input'
       />
-      <div className='mt-4 flex flex-wrap gap-2'>
+      <div
+        className='mt-4 flex flex-wrap gap-2'
+        data-testid='form-image-previews-container'
+      >
         {imagePreviews.map((preview, index) => (
           <img
             key={index}
             src={preview}
             alt={`Preview ${index + 1}`}
             className='h-20 w-20 rounded-lg object-cover'
+            data-testid={`form-image-preview-${index}`}
           />
         ))}
       </div>

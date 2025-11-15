@@ -31,6 +31,7 @@ export function FilterBar(props: FilterBarProps) {
             onKeyDown={handleLocationKeyDown}
             placeholder='Filtrar por cidade...'
             className='w-full rounded-full border border-gray-300 bg-white py-2 pl-10 pr-4 md:w-auto'
+            data-testid='filterbar-location-input'
           />
         </div>
       </div>
@@ -46,6 +47,7 @@ export function FilterBar(props: FilterBarProps) {
             value={props.filterRating}
             onChange={(e) => props.setFilterRating(e.target.value)}
             className='w-full rounded-full border border-gray-300 bg-white py-2 pl-10 pr-4 md:w-auto'
+            data-testid='filterbar-rating-select'
           >
             <option value='all'>Melhores Avaliações</option>
             <option value='4.5'>4.5+ estrelas</option>
