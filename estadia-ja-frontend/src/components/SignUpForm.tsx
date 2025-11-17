@@ -84,13 +84,13 @@ export function SignUpForm() {
 
       try {
         const loginResponse = await axios.post(loginApiUrl, loginPayload);
-        
+
         // ALTERAÇÃO: Usar a função 'login' do AuthContext
         const token = loginResponse.data.token;
         const userId = loginResponse.data.userId;
 
         if (!token || !userId) {
-          throw new Error("Resposta de login inválida do servidor.");
+          throw new Error('Resposta de login inválida do servidor.');
         }
 
         setApiMessage({
@@ -98,8 +98,7 @@ export function SignUpForm() {
           text: 'Usuário criado e logado! Redirecionando...',
         });
 
-        login(token, userId, "/"); 
-
+        login(token, userId, '/');
       } catch (error) {
         console.error('Cadastro OK, mas login automático falhou:', error);
         setApiMessage({
@@ -125,7 +124,7 @@ export function SignUpForm() {
       ? 'ring-2 ring-red-500 border-red-500'
       : 'focus:ring-2 focus:ring-[#1D3557]';
   };
-  
+
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '').slice(0, 11);
     value = value.replace(/(\d{3})(\d)/, '$1.$2');
