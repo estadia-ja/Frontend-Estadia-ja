@@ -10,6 +10,10 @@ import { BecomeOwnerBlock } from '../../components/BecomeOwnerBlock';
 import { AnalyticsBlock } from '../../components/AnalyticsBlock';
 import { MyPropertiesBlock } from '../../components/MyPropertiesBlock';
 import { OwnerReservationsBlock } from '../../components/OwnerReservationsBlock';
+import { Header } from '../../components/Header';
+import { Footer } from '../../components/Footer';
+
+// Modais
 import { ErrorModal } from '../../components/modals/ErrorModal';
 import { SuccessModal } from '../../components/modals/SuccessModal';
 import { ConfirmModal } from '../../components/modals/ConfirmModal';
@@ -17,10 +21,10 @@ import { UpdateReservationModal } from '../../components/modals/UpdateReservatio
 import { PaymentModal } from '../../components/modals/PaymentModal';
 import { RatingModal } from '../../components/modals/RatingModal';
 import { ClientRatingModal } from '../../components/modals/ClientRatingModal';
+import { UpdateUserModal } from '../../components/modals/updateUserModal';
+
 import { type DateRange } from 'react-day-picker';
 import { isSameDay } from 'date-fns';
-import { Header } from '../../components/Header';
-import { Footer } from '../../components/Footer';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -35,7 +39,7 @@ export type User = {
   cpf: string;
   phones: Phone[];
   avatarUrl: string;
-  avgRating: string;
+  avgRating:string;
 };
 
 export type Reservation = ReservationWithProperty;
@@ -46,25 +50,26 @@ export function ProfilePage() {
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
   const [ownerReservations, setOwnerReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
-  const [reservationToRate, setReservationToRate] =
-    useState<Reservation | null>(null);
+  
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isClientRatingModalOpen, setIsClientRatingModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [reservationToPay, setReservationToPay] = useState<Reservation | null>(
-    null
-  );
-  const [reservationToUpdate, setReservationToUpdate] =
-    useState<Reservation | null>(null);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [isClientRatingModalOpen, setIsClientRatingModalOpen] = useState(false);
+  
+  const [isUpdateUserModalOpen, setIsUpdateUserModalOpen] = useState(false);
+  const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+
+  const [reservationToRate, setReservationToRate] = useState<Reservation | null>(null);
+  const [reservationToPay, setReservationToPay] = useState<Reservation | null>(null);
+  const [reservationToUpdate, setReservationToUpdate] = useState<Reservation | null>(null);
+  
   const [modalMessage, setModalMessage] = useState<string | null>(null);
-  const [modalTitle, setModalTitle] = useState('');
-  const [onConfirmAction, setOnConfirmAction] = useState<
-    (() => Promise<void>) | null
-  >(null);
+  const [modalTitle, setModalTitle] = useState("");
+  const [onConfirmAction, setOnConfirmAction] = useState<(() => Promise<void>) | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -78,16 +83,16 @@ export function ProfilePage() {
     }
     throw error;
   };
-
+  
   const showErrorModal = (message: string) => {
     setModalMessage(message);
     setIsErrorModalOpen(true);
   };
-
+  
   const showSuccessModal = (message: string) => {
     setModalMessage(message);
     setIsSuccessModalOpen(true);
-  };
+  }
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -124,7 +129,7 @@ export function ProfilePage() {
         ownerReservationsPromise,
       ]);
 
-      const avatarUrl = `${API_URL}/user/${userId}/image`;
+      const avatarUrl = `${API_URL}/user/${userId}/image?t=${Date.now()}`;
 
       setUser({ ...userResponse.data, avatarUrl });
       setMyProperties(propertiesResponse.data || []);
@@ -133,7 +138,7 @@ export function ProfilePage() {
     } catch (error) {
       console.error('Erro ao buscar dados do perfil:', error);
       if (!axios.isAxiosError(error) || error.response?.status !== 401) {
-        showErrorModal('Falha ao carregar dados do perfil. Tente novamente.');
+        setApiError('Falha ao carregar dados do perfil.');
       }
     } finally {
       setIsLoading(false);
@@ -144,11 +149,113 @@ export function ProfilePage() {
     fetchData();
   }, []);
 
+  const handleUpdateUser = async (updatedData: { name: string; email: string; phone: string }) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    setIsActionLoading(true);
+    try {
+      const payload = {
+        name: updatedData.name,
+        email: updatedData.email,
+        phones: [updatedData.phone] 
+      };
+
+      await api.put(`/user/${userId}`, payload);
+      
+      showSuccessModal("Perfil atualizado com sucesso!");
+      fetchData(); 
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      let msg = "Falha ao atualizar perfil.";
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        msg = error.response.data.error;
+      }
+      showErrorModal(msg);
+    } finally {
+      setIsActionLoading(false);
+      setIsUpdateUserModalOpen(false);
+    }
+  };
+
+  const handleUploadImage = async (file: File) => {
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("authToken");
+    
+    if (!userId || !token) {
+      showErrorModal("Você precisa estar logado.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setIsLoading(true); 
+
+    try {
+      await axios.post(`${API_URL}/user/${userId}/upload`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      showSuccessModal("Foto de perfil atualizada!");
+      
+      const newAvatarUrl = `${API_URL}/user/${userId}/image?t=${Date.now()}`;
+      if (user) {
+        setUser({ ...user, avatarUrl: newAvatarUrl });
+      }
+      
+    } catch (error) {
+      console.error("Erro ao enviar imagem:", error);
+      let msg = "Falha ao enviar imagem.";
+      
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data?.error) {
+           msg = error.response.data.error;
+        } else if (error.response?.data?.message) {
+           msg = error.response.data.message;
+        }
+      }
+      showErrorModal(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteUser = () => {
+    setModalTitle("Excluir Conta");
+    setModalMessage("Tem certeza que deseja excluir sua conta? Todos os seus dados serão apagados permanentemente.");
+    setOnConfirmAction(() => executeDeleteUser);
+    setIsDeleteUserModalOpen(true);
+  };
+
+  const executeDeleteUser = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    setIsActionLoading(true);
+    try {
+      await api.delete(`/user/${userId}`);
+      
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userId");
+      window.location.href = "/login";
+      
+    } catch (error) {
+      console.error("Erro ao excluir conta:", error);
+      showErrorModal("Falha ao excluir conta.");
+      setIsActionLoading(false);
+    } finally {
+      setIsDeleteUserModalOpen(false);
+    }
+  };
+
   const handleEditProperty = (id: string) => {
     navigate(`/property/edit/${id}`);
   };
 
-  const handleDeleteProperty = async (id: string) => {
+  const handleDeleteProperty = (id: string) => {
     setModalTitle('Deletar Imóvel');
     setModalMessage(
       'Tem certeza que deseja deletar este imóvel? Esta ação é permanente.'
@@ -200,17 +307,13 @@ export function ProfilePage() {
         fromDate.getFullYear(),
         fromDate.getMonth(),
         fromDate.getDate(),
-        14,
-        0,
-        0
+        14, 0, 0
       );
       const checkOutDateTime = new Date(
         toDate.getFullYear(),
         toDate.getMonth(),
         toDate.getDate(),
-        11,
-        0,
-        0
+        11, 0, 0
       );
       const payload = {
         dateStart: checkInDateTime.toISOString(),
@@ -289,10 +392,7 @@ export function ProfilePage() {
     setIsRatingModalOpen(true);
   };
 
-  const executeCreatePropertyRating = async (
-    rating: number,
-    comment: string
-  ) => {
+  const executeCreatePropertyRating = async (rating: number, comment: string) => {
     const reservationId = reservationToRate?.id;
     if (!reservationId) {
       showErrorModal('Erro: não foi possível identificar a reserva.');
@@ -300,7 +400,7 @@ export function ProfilePage() {
     }
     setIsActionLoading(true);
     try {
-      const payload = { rating, comment };
+      const payload = { noteProperty: rating, commentProperty: comment };
       await api.post(`/reserve/${reservationId}/property-valuation`, payload);
       showSuccessModal('Avaliação enviada com sucesso!');
       fetchData();
@@ -349,10 +449,7 @@ export function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div
-        className='flex flex-grow items-center justify-center bg-[#A8DADC]'
-        data-testid='profile-page-loading'
-      >
+      <div className='flex flex-grow items-center justify-center bg-[#A8DADC]'>
         <p className='text-lg'>Carregando perfil...</p>
       </div>
     );
@@ -393,7 +490,14 @@ export function ProfilePage() {
         data-testid='profile-page-container'
       >
         <div className='container mx-auto max-w-7xl space-y-10'>
-          <ProfileHeader user={user} />
+          
+          {/* Passamos as funções de usuário para o Header */}
+          <ProfileHeader 
+            user={user} 
+            onEdit={() => setIsUpdateUserModalOpen(true)}
+            onUploadImage={handleUploadImage}
+            onDeleteUser={handleDeleteUser}
+          />
 
           <ReservationsBlock
             reservations={myReservations}
@@ -424,11 +528,23 @@ export function ProfilePage() {
         </div>
       </div>
       <Footer />
+      
+      {/* MODAIS GERAIS */}
       {isConfirmModalOpen && onConfirmAction && (
         <ConfirmModal
           title={modalTitle}
           message={modalMessage || ''}
           onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={onConfirmAction}
+          isLoading={isActionLoading}
+        />
+      )}
+
+      {isDeleteUserModalOpen && onConfirmAction && (
+        <ConfirmModal
+          title={modalTitle}
+          message={modalMessage || ""}
+          onClose={() => setIsDeleteUserModalOpen(false)}
           onConfirm={onConfirmAction}
           isLoading={isActionLoading}
         />
@@ -448,7 +564,8 @@ export function ProfilePage() {
         />
       )}
 
-      {isUpdateModalOpen && (
+      {/* MODAIS DE RESERVA E PAGAMENTO */}
+      {isUpdateModalOpen && reservationToUpdate && (
         <UpdateReservationModal
           onClose={() => setIsUpdateModalOpen(false)}
           onConfirm={executeUpdateReservation}
@@ -478,6 +595,16 @@ export function ProfilePage() {
         <ClientRatingModal
           onClose={() => setIsClientRatingModalOpen(false)}
           onConfirm={executeCreateClientRating}
+          isLoading={isActionLoading}
+        />
+      )}
+
+      {/* MODAL DE USUÁRIO */}
+      {isUpdateUserModalOpen && user && (
+        <UpdateUserModal
+          user={user}
+          onClose={() => setIsUpdateUserModalOpen(false)}
+          onConfirm={handleUpdateUser}
           isLoading={isActionLoading}
         />
       )}
