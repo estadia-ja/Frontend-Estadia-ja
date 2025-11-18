@@ -34,18 +34,25 @@ export function NewProperty() {
   const [city, setCity] = useState('');
   const [CEP, setCEP] = useState('');
   const [dailyRate, setDailyRate] = useState('100');
-  const [images, setImages] = useState<FileList | null>(null);
+  const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(e.target.files);
-      const files = Array.from(e.target.files);
-      const previews = files.map((file) => URL.createObjectURL(file));
-      setImagePreviews(previews);
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      
+      if (images.length + newFiles.length > 5) {
+        alert("Você só pode enviar no máximo 5 imagens.");
+        return;
+      }
+
+      setImages(prevImages => [...prevImages, ...newFiles]);
+      
+      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+      setImagePreviews(prevPreviews => [...prevPreviews, ...newPreviews]);
     }
   };
 
