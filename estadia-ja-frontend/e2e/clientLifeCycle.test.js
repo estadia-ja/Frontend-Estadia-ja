@@ -120,8 +120,8 @@ async function runClientTest() {
 
     await driver.wait(until.elementLocated(By.css('[data-testid="update-reservation-modal-daypicker"]')), 30000);
 
-    const newCheckInDate = getFutureDate(8);
-    const newCheckOutDate = getFutureDate(10);
+    const newCheckInDate = getFutureDate(1);
+    const newCheckOutDate = getFutureDate(4);
     const updateCheckInSelector = By.css(`td[data-day='${newCheckInDate}'] .rdp-day_button`);
     const updateCheckOutSelector = By.css(`td[data-day='${newCheckOutDate}'] .rdp-day_button`);
 
