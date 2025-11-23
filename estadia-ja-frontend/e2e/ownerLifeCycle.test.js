@@ -61,7 +61,7 @@ async function runOwnerTest() {
     await driver.findElement(By.xpath("//label[contains(text(), 'Cidade')]/..//input")).sendKeys('São Paulo');
     await driver.findElement(By.xpath("//label[contains(text(), 'Estado')]/..//input")).sendKeys('SP');
     await driver.findElement(By.xpath("//label[contains(text(), 'CEP')]/..//input")).sendKeys('01001-000');
-    await driver.findElement(By.css('[data-testid="form-textarea-description"]')).sendKeys('Descricao automatica Selenium');
+    await driver.findElement(By.css('[data-testid="form-textarea-description"]')).sendKeys('Um lugar muito bom para toda a sua família');
 
     const imagePath = path.resolve(__dirname, 'teste.jpg'); 
     await driver.findElement(By.css('[data-testid="form-image-upload-input"]')).sendKeys(imagePath);
